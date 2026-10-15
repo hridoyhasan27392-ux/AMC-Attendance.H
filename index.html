@@ -300,20 +300,135 @@
         document.body.classList.contains("dark") ? "☀️" : "🌙";
     });
 
-    document.querySelectorAll("[data-role]").forEach(button => {
-      button.addEventListener("click", function () {
-        const role = this.dataset.role;
+  document.querySelectorAll("[data-role]").forEach(button => {
+  button.addEventListener("click", function () {
+    const role = this.dataset.role;
+    const main = document.querySelector("main");
 
-        const labels = {
-          admin: "অ্যাডমিন",
-          teacher: "শিক্ষক",
-          student: "শিক্ষার্থী"
-        };
+    if (role === "admin") {
+      showAdminPanel(main);
+    } else if (role === "teacher") {
+      main.innerHTML = `
+        <h1>শিক্ষক প্যানেল</h1>
+        <p>শিক্ষক প্যানেল পরবর্তী ধাপে তৈরি করব।</p>
+        <button class="submit" onclick="location.reload()">
+          ফিরে যাও
+        </button>
+      `;
+    } else {
+      main.innerHTML = `
+        <h1>ছাত্র প্যানেল</h1>
+        <p>শিক্ষার্থী প্যানেল পরবর্তী ধাপে তৈরি করব।</p>
+        <button class="submit" onclick="location.reload()">
+          ফিরে যাও
+        </button>
+      `;
+    }
+  });
+});
 
-        message.textContent =
-          labels[role] +
-          " প্যানেল এখনো তৈরি হয়নি। পরবর্তী ধাপে লগইন যুক্ত হবে।";
-      });
+function showAdminPanel(main) {
+  const students = JSON.parse(
+    localStorage.getItem("amc_students") || "[]"
+  );
+
+  main.innerHTML = `
+    <div class="paper">🎓</div>
+    <h1>অ্যাডমিন প্যানেল</h1>
+    <p class="subtitle">নতুন শিক্ষার্থীর তথ্য যোগ করুন</p>
+
+    <form id="studentForm">
+      <input class="pin" id="studentName"
+        placeholder="শিক্ষার্থীর নাম"
+        maxlength="100" required
+        style="font-size:20px;letter-spacing:0">
+
+      <input class="pin" id="studentRoll"
+        placeholder="শিক্ষার্থীর রোল"
+        maxlength="20" required
+        style="font-size:20px;letter-spacing:0">
+
+      <button class="submit" type="submit">
+        শিক্ষার্থী যোগ করুন
+      </button>
+    </form>
+
+    <p id="adminMessage" class="message" role="status"></p>
+    <h2>শিক্ষার্থীদের তালিকা (${students.length})</h2>
+    <div id="studentList"></div>
+
+    <button class="submit" id="homeButton"
+      style="margin-top:25px">
+      মূল পেজে ফিরে যান
+    </button>
+  `;
+
+  function renderStudents() {
+    const list = document.getElementById("studentList");
+    const current = JSON.parse(
+      localStorage.getItem("amc_students") || "[]"
+    );
+
+    if (current.length === 0) {
+      list.textContent = "এখনো কোনো শিক্ষার্থী যোগ করা হয়নি।";
+      return;
+    }
+
+    list.replaceChildren();
+
+    current.forEach((student, index) => {
+      const item = document.createElement("p");
+      item.textContent =
+        (index + 1) + ". " + student.name +
+        " — রোল: " + student.roll;
+
+      list.appendChild(item);
+    });
+  }
+
+  document.getElementById("studentForm")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const name = document.getElementById("studentName")
+        .value.trim();
+      const roll = document.getElementById("studentRoll")
+        .value.trim();
+      const message = document.getElementById("adminMessage");
+
+      if (!name || !roll) {
+        message.textContent = "নাম ও রোল লিখুন।";
+        return;
+      }
+
+      const current = JSON.parse(
+        localStorage.getItem("amc_students") || "[]"
+      );
+
+      if (current.some(student => student.roll === roll)) {
+        message.textContent = "এই রোলটি আগে যোগ করা হয়েছে।";
+        return;
+      }
+
+      current.push({ name, roll });
+
+      localStorage.setItem(
+        "amc_students",
+        JSON.stringify(current)
+      );
+
+      document.getElementById("studentName").value = "";
+      document.getElementById("studentRoll").value = "";
+
+      message.textContent = "শিক্ষার্থীর তথ্য যোগ হয়েছে।";
+      renderStudents();
+    });
+
+  document.getElementById("homeButton")
+    .addEventListener("click", () => location.reload());
+
+  renderStudents();
+    }
     });
 
     pinInput.addEventListener("input", function () {
