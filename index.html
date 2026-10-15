@@ -1,0 +1,350 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <meta name="theme-color" content="#5945e8">
+  <meta name="description"
+        content="AMC Economics Department Attendance App">
+
+  <link rel="manifest" href="./manifest.json">
+
+  <title>AMC Economics Attendance</title>
+
+  <style>
+    :root {
+      --primary: #5042e9;
+      --text: #202938;
+      --muted: #737d91;
+      --card: #ffffff;
+      --field: #eef2ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+      color: var(--text);
+      background: linear-gradient(
+        145deg, #5145e8, #902fe8, #e43da7
+      );
+    }
+
+    header {
+      padding: 18px 16px;
+      background: #ffffff20;
+      color: white;
+      box-shadow: 0 5px 20px #00000010;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand {
+      flex: 0 0 auto;
+      font-size: 23px;
+      font-weight: 800;
+      line-height: 1.4;
+      margin-right: 4px;
+    }
+
+    .menu {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow-x: auto;
+      flex: 1;
+      scrollbar-width: none;
+    }
+
+    .menu::-webkit-scrollbar {
+      display: none;
+    }
+
+    .menu button {
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 17px;
+      padding: 15px 17px;
+      font-size: 17px;
+      font-family: inherit;
+      color: white;
+      background: #ffffff30;
+      cursor: pointer;
+    }
+
+    .menu button:active {
+      background: #ffffff55;
+    }
+
+    .theme-button {
+      font-size: 23px !important;
+      min-width: 58px;
+    }
+
+    main {
+      width: min(100% - 32px, 650px);
+      margin: 45px auto 35px;
+      padding: 34px 24px;
+      border-radius: 32px;
+      background: var(--card);
+      text-align: center;
+      box-shadow: 0 15px 45px #3c136520;
+    }
+
+    .paper {
+      font-size: 86px;
+      line-height: 1.35;
+    }
+
+    h1 {
+      margin: 4px 0 12px;
+      font-size: clamp(31px, 8vw, 48px);
+      line-height: 1.3;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.8;
+    }
+
+    .pin {
+      display: block;
+      width: 100%;
+      margin: 26px 0 20px;
+      padding: 20px 8px;
+      border: 5px solid #a8b5ff;
+      border-radius: 28px;
+      background: var(--field);
+      color: var(--text);
+      text-align: center;
+      font-size: clamp(36px, 11vw, 58px);
+      font-weight: 700;
+      letter-spacing: 8px;
+      outline: none;
+    }
+
+    .pin:focus {
+      border-color: var(--primary);
+    }
+
+    .submit {
+      display: block;
+      width: 100%;
+      padding: 20px 12px;
+      border: none;
+      border-radius: 23px;
+      background: var(--primary);
+      color: white;
+      font-family: inherit;
+      font-size: 28px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 22px #5042e926;
+    }
+
+    .submit:active {
+      transform: scale(0.99);
+    }
+
+    .message {
+      margin-top: 18px;
+      color: var(--primary);
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+    }
+
+    .hint {
+      margin-top: 25px;
+      color: #9aa3b4;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    footer {
+      padding: 15px;
+      text-align: center;
+      color: white;
+      font-size: 13px;
+    }
+
+    body.dark {
+      --card: #202438;
+      --text: #f4f5ff;
+      --muted: #c0c6d9;
+      --field: #30364e;
+    }
+
+    body.dark .hint {
+      color: #c0c6d9;
+    }
+
+    @media (max-width: 380px) {
+      header {
+        padding: 14px 10px;
+      }
+
+      .brand {
+        font-size: 19px;
+      }
+
+      .menu {
+        gap: 7px;
+      }
+
+      .menu button {
+        padding: 12px;
+        font-size: 15px;
+      }
+
+      main {
+        padding: 28px 18px;
+        margin-top: 32px;
+      }
+
+      .paper {
+        font-size: 72px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        🎓 AMC<br>অর্থনীতি
+      </div>
+
+      <nav class="menu" aria-label="প্রধান মেনু">
+        <button class="theme-button"
+                id="themeButton"
+                aria-label="থিম পরিবর্তন">
+          🌙
+        </button>
+
+        <button data-role="admin">অ্যাডমিন</button>
+        <button data-role="teacher">শিক্ষক</button>
+        <button data-role="student">ছাত্র</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="paper">📝</div>
+
+    <h1>হাজিরা দিন</h1>
+
+    <p class="subtitle">
+      শিক্ষকের দেওয়া ৪-ডিজিটের PIN লিখুন
+    </p>
+
+    <form id="attendanceForm">
+      <input
+        class="pin"
+        id="pin"
+        type="text"
+        inputmode="numeric"
+        pattern="[0-9]{4}"
+        maxlength="4"
+        placeholder="0000"
+        autocomplete="off"
+        aria-label="চার ডিজিটের PIN"
+        required
+      >
+
+      <button class="submit" type="submit">
+        সাবমিট
+      </button>
+    </form>
+
+    <div class="message"
+         id="message"
+         role="status"
+         aria-live="polite"></div>
+
+    <p class="hint">
+      💡 প্রকৃত হাজিরার জন্য শিক্ষার্থীর পরিচয় যাচাই
+      ও সার্ভারের সংযোগ প্রয়োজন।
+    </p>
+  </main>
+
+  <footer>
+    AMC Economics Department<br>
+    Attendance Management System
+  </footer>
+
+  <script>
+    const form = document.getElementById("attendanceForm");
+    const pinInput = document.getElementById("pin");
+    const message = document.getElementById("message");
+    const themeButton = document.getElementById("themeButton");
+
+    themeButton.addEventListener("click", function () {
+      document.body.classList.toggle("dark");
+
+      themeButton.textContent =
+        document.body.classList.contains("dark") ? "☀️" : "🌙";
+    });
+
+    document.querySelectorAll("[data-role]").forEach(button => {
+      button.addEventListener("click", function () {
+        const role = this.dataset.role;
+
+        const labels = {
+          admin: "অ্যাডমিন",
+          teacher: "শিক্ষক",
+          student: "শিক্ষার্থী"
+        };
+
+        message.textContent =
+          labels[role] +
+          " প্যানেল এখনো তৈরি হয়নি। পরবর্তী ধাপে লগইন যুক্ত হবে।";
+      });
+    });
+
+    pinInput.addEventListener("input", function () {
+      this.value = this.value.replace(/[^0-9]/g, "").slice(0, 4);
+    });
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const pin = pinInput.value;
+
+      if (!/^[0-9]{4}$/.test(pin)) {
+        message.textContent = "সঠিক ৪ ডিজিটের PIN লিখুন।";
+        return;
+      }
+
+      message.textContent =
+        "ডিজাইন সফলভাবে চলছে। এখনো সার্ভার যুক্ত হয়নি; " +
+        "প্রকৃত হাজিরা জমা হয়নি।";
+    });
+  </script>
+  <script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("./sw.js")
+        .catch(error => {
+          console.error("Service Worker error:", error);
+        });
+    });
+  }
+  </script>
+</body>
+</html>
