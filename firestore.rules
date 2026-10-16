@@ -2,51 +2,49 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
-    function hasProfile() { return signedIn() && exists(/databases/$(database)/documents/profiles/$(request.auth.uid)); }
-    function profile() { return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data; }
-    function isAdmin() { return hasProfile() && profile().role == 'admin'; }
-    function isTeacher() { return hasProfile() && profile().role == 'teacher'; }
-    function isStudent() { return hasProfile() && profile().role == 'student'; }
-    function staff() { return isAdmin() || isTeacher(); }
+    function myProfile() {
+      return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data;
+    }
+    function hasProfile() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/profiles/$(request.auth.uid));
+    }
+    function isAdmin() { return hasProfile() && myProfile().role == 'admin'; }
+    function isTeacher() { return hasProfile() && myProfile().role == 'teacher'; }
+    function isStudent() { return hasProfile() && myProfile().role == 'student'; }
 
     match /profiles/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow create, update, delete: if isAdmin();
     }
-    match /students/{uid} {
-      allow read: if staff() || (signedIn() && request.auth.uid == uid && isStudent());
+    match /students/{id} {
+      allow read: if isAdmin() || isTeacher() ||
+        (isStudent() && resource.data.uid == request.auth.uid);
       allow create, update, delete: if isAdmin();
     }
-    match /sessions/{sessionId} {
-      allow read: if signedIn();
-      allow create, update, delete: if staff();
+    match /courses/{id} {
+      allow read: if hasProfile();
+      allow create, update, delete: if isAdmin();
     }
-    match /sessionPins/{sessionId} {
-      allow read: if staff();
-      allow create, update, delete: if staff();
+    match /sessions/{id} {
+      allow read: if hasProfile();
+      allow create, update, delete: if isAdmin();
     }
-    match /courses/{courseId} {
-      allow read: if signedIn();
-      allow create, update, delete: if staff();
+    match /attendance/{id} {
+      allow read: if isAdmin() || isTeacher() ||
+        (isStudent() && (resource.data.studentUid == request.auth.uid));
+      allow create: if isAdmin() || isTeacher();
+      allow update, delete: if isAdmin();
     }
-    match /notices/{noticeId} {
-      allow read: if true;
-      allow create, update, delete: if staff();
+    match /notices/{id} {
+      allow read: if hasProfile();
+      allow create, update, delete: if isAdmin() || isTeacher();
     }
-    match /attendance/{recordId} {
-      allow read: if staff() || (isStudent() && resource.data.studentUid == request.auth.uid);
-      allow create: if staff() || (isStudent()
-        && request.resource.data.studentUid == request.auth.uid
-        && request.resource.data.status == 'উপস্থিত'
-        && request.resource.data.date is string
-        && request.resource.data.sessionId is string
-        && get(/databases/$(database)/documents/sessions/$(request.resource.data.sessionId)).data.active == true
-        && get(/databases/$(database)/documents/sessionPins/$(request.resource.data.sessionId)).data.attendancePin == request.resource.data.pinAttempt);
-      allow update, delete: if staff();
-    }
-    match /marks/{markId} {
-      allow read: if staff() || (isStudent() && resource.data.studentUid == request.auth.uid);
-      allow create, update, delete: if staff();
+    match /marks/{id} {
+      allow read: if isAdmin() || isTeacher() ||
+        (isStudent() && resource.data.studentUid == request.auth.uid);
+      allow create, update: if isAdmin() || isTeacher();
+      allow delete: if isAdmin();
     }
   }
 }

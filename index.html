@@ -1,42 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#5945e8">
-  <meta name="description" content="AMC Economics Department Attendance App">
-  <link rel="manifest" href="./manifest.json">
-  <title>AMC Economics Attendance</title>
-  <link rel="stylesheet" href="./style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#123c69">
+  <title>AMC Attendance</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <header>
-    <div class="topbar">
-      <div class="brand">🎓 AMC<br><span>অর্থনীতি</span></div>
-      <nav class="menu" aria-label="প্রধান মেনু">
-        <button class="theme-button" id="themeButton" aria-label="থিম পরিবর্তন">🌙</button>
-        <button data-role="admin">⚙️ অ্যাডমিন</button>
-        <button data-role="teacher">👨‍🏫 শিক্ষক</button>
-        <button data-role="student">🎓 ছাত্র</button>
-      </nav>
+<header class="topbar">
+  <div class="brand"><div class="logo">AMC</div><div><h1>AMC Attendance</h1><p>আনন্দ মোহন কলেজ</p></div></div>
+  <button id="themeBtn" class="ghost" type="button">🌙 থিম</button>
+</header>
+<main class="wrap">
+  <section id="setupNotice" class="notice hidden"></section>
+  <section id="loginCard" class="panel auth">
+    <h2>অ্যাকাউন্টে প্রবেশ</h2>
+    <p class="muted">অ্যাডমিন, শিক্ষক বা শিক্ষার্থীর নিবন্ধিত ইমেইল ব্যবহার করুন।</p>
+    <form id="loginForm">
+      <label>ইমেইল<input id="email" type="email" autocomplete="username" required placeholder="name@example.com"></label>
+      <label>পাসওয়ার্ড<input id="password" type="password" autocomplete="current-password" required minlength="6" placeholder="পাসওয়ার্ড"></label>
+      <button class="primary" type="submit">লগইন</button>
+    </form>
+    <p id="loginMsg" class="message" role="status"></p>
+  </section>
+  <section id="app" class="hidden">
+    <div class="welcome panel">
+      <div><h2 id="welcomeTitle">ড্যাশবোর্ড</h2><p id="userLine" class="muted"></p></div>
+      <button id="logoutBtn" class="danger" type="button">লগআউট</button>
     </div>
-  </header>
-  <div id="statusBar" class="status-bar" role="status"></div>
-  <main id="main">
-    <div class="paper">📝</div>
-    <h1>হাজিরা দিন</h1>
-    <p class="subtitle">শিক্ষকের দেওয়া ৪-ডিজিটের PIN লিখুন</p>
-    <p class="hint">প্রথমে শিক্ষার্থী হিসেবে লগইন করুন, তারপর সেশনের PIN দিয়ে হাজিরা দিন।</p>
-    <button class="submit" id="startStudent">শিক্ষার্থী লগইন</button>
-  </main>
-  <footer>AMC Economics Department<br>Attendance Management System</footer>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="./config.js"></script>
-  <script src="./app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.error));
-  </script>
+    <nav id="nav" class="nav"></nav>
+    <section id="view" class="panel"></section>
+  </section>
+  <footer>AMC Attendance · নিরাপদ ব্যবহারের জন্য নিজের অ্যাকাউন্ট থেকে লগআউট করুন।</footer>
+</main>
+<script src="config.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
