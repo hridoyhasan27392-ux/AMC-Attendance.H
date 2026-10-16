@@ -1,366 +1,84 @@
-const $ = id => document.getElementById(id);
-const main = document.querySelector("main");
-const nav = document.querySelector(".menu");
 
-const get = key => {
-  try { return JSON.parse(localStorage.getItem("amc_" + key) || "[]"); }
-  catch { return []; }
-};
-const save = (key, value) =>
-  localStorage.setItem("amc_" + key, JSON.stringify(value));
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123c2c">
+  <meta name="description" content="AMC Economics Attendance Management System">
+  <title>AMC Attendance</title>
 
-const menus = [
-  ["admin", "⚙️ অ্যাডমিন"],
-  ["teacher", "👨‍🏫 শিক্ষক"],
-  ["student", "🎓 ছাত্র"],
-  ["courses", "📚 কোর্স ম্যাপিং"],
-  ["reports", "📊 রিপোর্ট"],
-  ["sessions", "📅 সেশন"],
-  ["notices", "📢 নোটিশ"],
-  ["attendance", "📝 হাজিরা দিন"],
-  ["live", "📈 লাইভ রিপোর্ট"],
-  ["manual", "✍️ ম্যানুয়াল এন্ট্রি"],
-  ["marks", "🧮 নম্বর এন্ট্রি"],
-  ["myattendance", "📊 আমার হাজিরা"],
-  ["mycourses", "📚 আমার কোর্স"],
-  ["tracking", "🔎 Tracking"],
-  ["backup", "💾 Backup"]
-];
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>AMC Attendance</h1>
+      <p>অর্থনীতি বিভাগ, আনন্দ মোহন কলেজ</p>
+    </div>
+    <button id="themeBtn" type="button" aria-label="থিম পরিবর্তন">
+      🌙
+    </button>
+  </header>
 
-let currentRole = "";
-let currentStudent = null;
+  <main class="container">
+    <div id="setupNotice" class="notice hidden" role="alert"></div>
 
-menus.forEach(([id, label]) => {
-  const b = document.createElement("button");
-  b.textContent = label;
-  b.dataset.page = id;
-  nav.appendChild(b);
-  b.addEventListener("click", () => openPage(id));
-});
+    <section id="loginCard" class="card">
+      <h2>লগইন</h2>
+      <p>আপনার অনুমোদিত অ্যাকাউন্ট দিয়ে প্রবেশ করুন।</p>
 
-function el(tag, attrs = {}, text = "") {
-  const e = document.createElement(tag);
-  Object.entries(attrs).forEach(([k, v]) => {
-    if (k === "className") e.className = v;
-    else e.setAttribute(k, v);
-  });
-  e.textContent = text;
-  return e;
-}
+      <form id="loginForm">
+        <label for="email">ইমেইল</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="username"
+          required
+        >
 
-function heading(title, desc = "") {
-  main.replaceChildren();
-  main.append(el("h1", {}, title));
-  if (desc) main.append(el("p", {className:"subtitle"}, desc));
-}
+        <label for="password">পাসওয়ার্ড</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        >
 
-function field(parent, label, id, type = "text") {
-  parent.append(el("label", {for:id}, label));
-  const input = el("input", {
-    id, type, required:"required",
-    style:"width:100%;padding:14px;margin:8px 0;border:2px solid #a8b5ff;border-radius:12px;font:inherit"
-  });
-  parent.append(input);
-  return input;
-}
+        <button type="submit">লগইন করুন</button>
+        <p id="loginMsg" role="status" aria-live="polite"></p>
+      </form>
+    </section>
 
-function button(parent, label, action) {
-  const b = el("button", {type:"button", className:"submit",
-    style:"font-size:18px;margin:12px 0;padding:14px"}, label);
-  b.addEventListener("click", action);
-  parent.append(b);
-  return b;
-}
+    <section id="app" class="hidden">
+      <div class="card">
+        <h2 id="welcomeTitle">স্বাগতম</h2>
+        <p id="userLine"></p>
+        <button id="logoutBtn" type="button">লগআউট</button>
+      </div>
 
-function form(parent, callback) {
-  const f = el("form");
-  f.addEventListener("submit", e => {
-    e.preventDefault();
-    callback(f);
-  });
-  parent.append(f);
-  return f;
-}
+      <nav id="nav" aria-label="প্রধান মেনু"></nav>
 
-function list(parent, items, formatter, remove) {
-  parent.append(el("h2", {}, "তালিকা (" + items.length + ")"));
-  if (!items.length) {
-    parent.append(el("p", {}, "এখনো কোনো তথ্য যোগ করা হয়নি।"));
-    return;
-  }
-  items.forEach((item, i) => {
-    const row = el("div", {style:"padding:12px;border-bottom:1px solid #ddd;text-align:left"});
-    row.append(el("p", {}, formatter(item, i)));
-    if (remove) button(row, "মুছে ফেলুন", () => {
-      if (confirm("তথ্যটি মুছে ফেলবেন?")) remove(i);
-    });
-    parent.append(row);
-  });
-}
+      <section id="view" class="card" aria-live="polite">
+        <p>লোড হচ্ছে…</p>
+      </section>
+    </section>
+  </main>
 
-function openPage(page) {
-  if (page === "admin" || page === "teacher") {
-    login(page);
-    return;
-  }
-  if (page === "student") {
-    studentLogin();
-    return;
-  }
-  if (page === "attendance") {
-    attendancePage();
-    return;
-  }
-  if (page === "myattendance" || page === "mycourses") {
-    if (!currentStudent) return studentLogin();
-    myPage(page);
-    return;
-  }
-  if (["courses","reports","sessions","notices","live",
-       "manual","marks","tracking","backup"].includes(page) &&
-      !currentRole) {
-    heading("অ্যাক্সেস প্রয়োজন", "প্রথমে শিক্ষক বা অ্যাডমিন হিসেবে লগইন করুন।");
-    button(main, "অ্যাডমিন লগইন", () => login("admin"));
-    button(main, "শিক্ষক লগইন", () => login("teacher"));
-    return;
-  }
+  <footer class="app-footer">
+    <p>AMC Attendance · Economics Department</p>
+  </footer>
 
-  if (page === "admin") return adminPage();
-  if (page === "teacher") return teacherPage();
-  if (page === "courses") return coursesPage();
-  if (page === "sessions") return sessionsPage();
-  if (page === "notices") return noticesPage();
-  if (page === "reports" || page === "live" || page === "tracking")
-    return reportPage(page);
-  if (page === "manual") return manualPage();
-  if (page === "marks") return marksPage();
-  if (page === "backup") return backupPage();
-}
+  <!-- Firebase SDK: app.js-এর আগে লোড হতে হবে -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-function login(role) {
-  heading(role === "admin" ? "🔐 অ্যাডমিন লগইন" : "👨‍🏫 শিক্ষক লগইন",
-    "এই ডেমোতে লগইন যাচাই এখনো সার্ভারে যুক্ত হয়নি।");
-  const f = form(main, () => {
-    alert("নিরাপদ লগইনের জন্য সার্ভার ও অ্যাকাউন্ট তৈরি করতে হবে।");
-  });
-  field(f, "ইমেইল", "loginEmail", "email");
-  field(f, "পাসওয়ার্ড", "loginPass", "password");
-  button(f, "লগইন", () => f.requestSubmit());
-  main.append(el("p", {className:"hint"},
-    "শুধু এই ফর্ম থাকলেই নিরাপদ লগইন তৈরি হয় না।"));
-}
-
-function studentLogin() {
-  heading("🎓 ছাত্র লগইন", "সেশন ও ক্লাস রোল দিয়ে নিজের তথ্য খুঁজুন।");
-  const f = form(main, () => {
-    const roll = $("studentLoginRoll").value.trim();
-    const session = $("studentSession").value.trim();
-    const s = get("students").find(x =>
-      x.roll === roll && (!session || x.session === session));
-    if (!s) return alert("শিক্ষার্থী পাওয়া যায়নি।");
-    currentStudent = s;
-    myPage("myattendance");
-  });
-  field(f, "সেশন (যেমন 2024-25)", "studentSession");
-  field(f, "ক্লাস রোল", "studentLoginRoll");
-  button(f, "খুঁজুন", () => f.requestSubmit());
-}
-
-function adminPage() {
-  heading("⚙️ অ্যাডমিন প্যানেল", "স্থানীয় ডেমো: শিক্ষার্থী যোগ ও তালিকা");
-  const f = form(main, f => {
-    const name = f.querySelector("#sName").value.trim();
-    const roll = f.querySelector("#sRoll").value.trim();
-    const session = f.querySelector("#sSession").value.trim();
-    const pin = f.querySelector("#sPin").value.trim();
-    const students = get("students");
-    if (students.some(s => s.roll === roll && s.session === session))
-      return alert("এই সেশনে রোলটি আগে আছে।");
-    students.push({name, roll, session, pin});
-    save("students", students);
-    adminPage();
-  });
-  field(f, "শিক্ষার্থীর নাম", "sName");
-  field(f, "রোল", "sRoll");
-  field(f, "সেশন", "sSession");
-  field(f, "৪ ডিজিটের PIN", "sPin", "password");
-  button(f, "শিক্ষার্থী যোগ করুন", () => f.requestSubmit());
-  list(main, get("students"),
-    s => `${s.name} — রোল: ${s.roll} — সেশন: ${s.session}`,
-    i => { const a = get("students"); a.splice(i,1); save("students",a); adminPage(); });
-  button(main, "মূল পেজ", () => location.reload());
-}
-
-function teacherPage() {
-  heading("👨‍🏫 শিক্ষক প্যানেল", "শিক্ষকের জন্য ডেমো মেনু");
-  button(main, "হাজিরা রিপোর্ট", () => openPage("reports"));
-  button(main, "ম্যানুয়াল হাজিরা", () => openPage("manual"));
-  button(main, "নম্বর এন্ট্রি", () => openPage("marks"));
-  button(main, "আমার কোর্স", () => openPage("courses"));
-}
-
-function attendancePage() {
-  heading("📝 হাজিরা দিন", "শিক্ষকের দেওয়া ৪ ডিজিটের PIN লিখুন");
-  const f = form(main, () => {
-    const pin = $("attPin").value.trim();
-    const s = get("students").find(x => x.pin === pin);
-    if (!s) return alert("PIN মেলেনি।");
-    const records = get("attendance");
-    const day = new Date().toLocaleDateString("en-CA");
-    if (records.some(r => r.roll === s.roll && r.date === day))
-      return alert("আজকের হাজিরা ইতিমধ্যে আছে।");
-    records.push({roll:s.roll, name:s.name, date:day,
-      time:new Date().toLocaleTimeString(), status:"উপস্থিত"});
-    save("attendance", records);
-    alert("এই ব্রাউজারে ডেমো হাজিরা সংরক্ষণ হয়েছে।");
-    attendancePage();
-  });
-  field(f, "৪ ডিজিটের PIN", "attPin", "password");
-  button(f, "সাবমিট", () => f.requestSubmit());
-}
-
-function sessionsPage() {
-  heading("📅 সেশন");
-  const f = form(main, f => {
-    const value = f.querySelector("#sessionName").value.trim();
-    const a = get("sessions");
-    if (!a.includes(value)) a.push(value);
-    save("sessions", a);
-    sessionsPage();
-  });
-  field(f, "নতুন সেশন", "sessionName");
-  button(f, "সেশন যোগ করুন", () => f.requestSubmit());
-  list(main, get("sessions"), x => x,
-    i => {const a=get("sessions");a.splice(i,1);save("sessions",a);sessionsPage();});
-}
-
-function noticesPage() {
-  heading("📢 নোটিশ");
-  const f = form(main, f => {
-    const title = f.querySelector("#noticeTitle").value.trim();
-    const body = f.querySelector("#noticeBody").value.trim();
-    const a = get("notices");
-    a.push({title,body,date:new Date().toLocaleDateString()});
-    save("notices", a);
-    noticesPage();
-  });
-  field(f, "নোটিশের শিরোনাম", "noticeTitle");
-  field(f, "নোটিশের বিবরণ", "noticeBody");
-  button(f, "নোটিশ প্রকাশ করুন", () => f.requestSubmit());
-  list(main, get("notices"), x => `${x.title}: ${x.body} (${x.date})`,
-    i => {const a=get("notices");a.splice(i,1);save("notices",a);noticesPage();});
-}
-
-function coursesPage() {
-  heading("📚 কোর্স ম্যাপিং", "কোর্স ও শিক্ষকের নাম যোগ করুন");
-  const f = form(main, f => {
-    const course=f.querySelector("#courseName").value.trim();
-    const teacher=f.querySelector("#courseTeacher").value.trim();
-    const a=get("courses"); a.push({course,teacher}); save("courses",a);
-    coursesPage();
-  });
-  field(f,"কোর্সের নাম","courseName");
-  field(f,"শিক্ষকের নাম","courseTeacher");
-  button(f,"কোর্স যোগ করুন",()=>f.requestSubmit());
-  list(main,get("courses"),x=>`${x.course} — শিক্ষক: ${x.teacher}`,
-    i=>{const a=get("courses");a.splice(i,1);save("courses",a);coursesPage();});
-}
-
-function reportPage(page) {
-  const records=get("attendance");
-  heading(page==="live"?"📈 লাইভ রিপোর্ট":
-    page==="tracking"?"🔎 Tracking":"📊 হাজিরা রিপোর্ট",
-    "এই ব্রাউজারে সংরক্ষিত ডেমো রেকর্ড");
-  list(main, records, r => `${r.date} ${r.time} — ${r.name} (${r.roll}) — ${r.status}`);
-  button(main,"CSV রিপোর্ট ডাউনলোড",()=>{
-    const csv=["তারিখ,সময়,নাম,রোল,অবস্থা",
-      ...records.map(r=>[r.date,r.time,r.name,r.roll,r.status]
-        .map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(","))].join("\n");
-    downloadFile("amc-report.csv","\uFEFF"+csv,"text/csv;charset=utf-8");
-  });
-}
-
-function manualPage() {
-  heading("✍️ ম্যানুয়াল এন্ট্রি");
-  const f=form(main,f=>{
-    const roll=f.querySelector("#manualRoll").value.trim();
-    const s=get("students").find(x=>x.roll===roll);
-    if(!s) return alert("রোল পাওয়া যায়নি।");
-    const a=get("attendance");
-    a.push({roll:s.roll,name:s.name,date:new Date().toLocaleDateString("en-CA"),
-      time:new Date().toLocaleTimeString(),status:"উপস্থিত (ম্যানুয়াল)"});
-    save("attendance",a); alert("ডেমো রেকর্ড যোগ হয়েছে।");
-  });
-  field(f,"শিক্ষার্থীর রোল","manualRoll");
-  button(f,"হাজিরা যোগ করুন",()=>f.requestSubmit());
-}
-
-function marksPage() {
-  heading("🧮 নম্বর এন্ট্রি");
-  const f=form(main,f=>{
-    const a=get("marks");
-    a.push({roll:f.querySelector("#markRoll").value.trim(),
-      subject:f.querySelector("#markSubject").value.trim(),
-      mark:f.querySelector("#markValue").value});
-    save("marks",a); marksPage();
-  });
-  field(f,"শিক্ষার্থীর রোল","markRoll");
-  field(f,"বিষয়","markSubject");
-  field(f,"প্রাপ্ত নম্বর","markValue","number");
-  button(f,"নম্বর সংরক্ষণ",()=>f.requestSubmit());
-  list(main,get("marks"),x=>`রোল ${x.roll} — ${x.subject}: ${x.mark}`);
-}
-
-function myPage(page) {
-  const s=currentStudent;
-  heading(page==="mycourses"?"📚 আমার কোর্স":"📊 আমার হাজিরা",
-    `${s.name} — রোল ${s.roll}`);
-  if(page==="mycourses") {
-    list(main,get("courses"),x=>`${x.course} — ${x.teacher}`);
-  } else {
-    const a=get("attendance").filter(r=>r.roll===s.roll);
-    list(main,a,r=>`${r.date} — ${r.status}`);
-    main.append(el("p",{},`মোট হাজিরা রেকর্ড: ${a.length}`));
-  }
-}
-
-function backupPage() {
-  heading("💾 Backup", "স্থানীয় তথ্য JSON ফাইলে সংরক্ষণ করুন");
-  button(main,"ব্যাকআপ ডাউনলোড",()=>{
-    const data={};
-    ["students","attendance","sessions","notices","courses","marks"]
-      .forEach(k=>data[k]=get(k));
-    downloadFile("amc-backup.json",JSON.stringify(data,null,2),"application/json");
-  });
-  const f=form(main,f=>{
-    const file=f.querySelector("#backupFile").files[0];
-    if(!file)return;
-    const reader=new FileReader();
-    reader.onload=()=>{
-      try {
-        const data=JSON.parse(reader.result);
-        ["students","attendance","sessions","notices","courses","marks"]
-          .forEach(k=>{if(Array.isArray(data[k]))save(k,data[k]);});
-        alert("ব্যাকআপ পুনরুদ্ধার হয়েছে।");
-      } catch { alert("ফাইলটি সঠিক JSON ব্যাকআপ নয়।"); }
-    };
-    reader.readAsText(file);
-  });
-  field(f,"ব্যাকআপ ফাইল নির্বাচন করুন","backupFile","file");
-  button(f,"ব্যাকআপ পুনরুদ্ধার",()=>f.requestSubmit());
-}
-
-function downloadFile(name, content, type) {
-  const url=URL.createObjectURL(new Blob([content],{type}));
-  const a=el("a",{href:url,download:name});
-  document.body.append(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
-}
-
-$("themeButton").addEventListener("click",()=>{
-  document.body.classList.toggle("dark");
-  $("themeButton").textContent =
-    document.body.classList.contains("dark") ? "☀️" : "🌙";
-});
-
-// প্রথম পেজে হাজিরা ফর্ম দেখাবে
+  <!-- প্রথমে Firebase Config, তারপর অ্যাপের JavaScript -->
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
