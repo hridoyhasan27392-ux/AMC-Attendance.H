@@ -1,8 +1,10 @@
-// Firebase Console থেকে নিজের প্রকল্পের Web App config এখানে বসাও.
-// API key frontend-এ থাকতে পারে, কিন্তু নিরাপত্তা Firestore Rules ও Auth দিয়ে নিশ্চিত করতে হবে.
+
 window.AMC_FIREBASE_CONFIG = {
-  apiKey: "PASTE_YOUR_FIREBASE_API_KEY",
-  authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
-  projectId: "PASTE_YOUR_PROJECT_ID",
-  appId: "PASTE_YOUR_FIREBASE_APP_ID"
+  apiKey: "AIzaSyDKHvAA6U9FJoOX1F2TYYkXx6Atazl5sxI",
+  authDomain: "amc-attendence.firebaseapp.com",
+  projectId: "amc-attendence",
+  storageBucket: "amc-attendence.firebasestorage.app",
+  messagingSenderId: "783387340703",
+  appId: "1:783387340703:web:f8821fd861c589ef7f17aa",
+  measurementId: "G-E5M2531CXE"
 };
