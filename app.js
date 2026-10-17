@@ -113,7 +113,6 @@
 
       auth = firebase.auth();
       db = firebase.firestore();
-
       auth.onAuthStateChanged(loadProfile);
     } catch (error) {
       console.error(error);
@@ -180,12 +179,7 @@
     message("প্রোফাইল পরীক্ষা হচ্ছে…");
 
     try {
-      console.log("Project ID:", config.projectId);
-      console.log("Logged-in UID:", user.uid);
-
       const ref = db.collection("profiles").doc(user.uid);
-      console.log("Profile path:", ref.path);
-
       const snap = await ref.get({ source: "server" });
 
       if (checkId !== profileCheckId) return;
@@ -213,28 +207,26 @@
 
       $("loginCard").classList.add("hidden");
       $("app").classList.remove("hidden");
-
       $("welcomeTitle").textContent =
         (profile.name || user.email) + " — " + roleBn(role);
-      $("userLine").textContent =
-        user.email + " · " + roleBn(role);
+      $("userLine").textContent = user.email + " · " + roleBn(role);
 
       active = "dashboard";
       buildNav();
       await render();
-
     } catch (error) {
       if (checkId !== profileCheckId) return;
       console.error("Profile error:", error);
-
       message(
         "Profile Error: " +
         (error.code || "unknown") + " — " + error.message,
         true
       );
     }
-       }function buildNav() {
-    const nav = $("menu");
+  }
+
+  function buildNav() {
+    const nav = $("nav");
     if (!nav || !profile) return;
 
     nav.innerHTML = "";
@@ -265,13 +257,8 @@
 
   async function getData() {
     const names = [
-      "students",
-      "profiles",
-      "courses",
-      "sessions",
-      "attendance",
-      "notices",
-      "marks"
+      "students", "profiles", "courses",
+      "sessions", "attendance", "notices", "marks"
     ];
 
     const result = {};
@@ -299,9 +286,13 @@
             ${
               rows.length
                 ? rows.map(row =>
-                    `<tr>${row.map(cell => `<td>${esc(cell)}</td>`).join("")}</tr>`
+                    `<tr>${row.map(cell =>
+                      `<td>${esc(cell)}</td>`
+                    ).join("")}</tr>`
                   ).join("")
-                : `<tr><td colspan="${headers.length}">কোনো তথ্য পাওয়া যায়নি</td></tr>`
+                : `<tr><td colspan="${headers.length}">
+                    কোনো তথ্য পাওয়া যায়নি
+                  </td></tr>`
             }
           </tbody>
         </table>
@@ -313,11 +304,8 @@
     return `
       <label class="field">
         <span>${esc(label)}</span>
-        <input
-          name="${esc(name)}"
-          type="${esc(type)}"
-          ${required ? "required" : ""}
-        >
+        <input name="${esc(name)}" type="${esc(type)}"
+          ${required ? "required" : ""}>
       </label>
     `;
   }
@@ -329,7 +317,9 @@
         <select name="${esc(name)}" required>
           <option value="">নির্বাচন করুন</option>
           ${options.map(option =>
-            `<option value="${esc(option.value)}">${esc(option.label)}</option>`
+            `<option value="${esc(option.value)}">
+              ${esc(option.label)}
+            </option>`
           ).join("")}
         </select>
       </label>
@@ -375,8 +365,7 @@
         msg.textContent = "সংরক্ষণ হচ্ছে…";
 
         try {
-          const data = transform(form);
-          await addDocument(collection, data);
+          await addDocument(collection, transform(form));
           msg.textContent = "তথ্য সফলভাবে সংরক্ষিত হয়েছে।";
           form.reset();
           await render();
@@ -402,15 +391,14 @@
     ];
 
     return `
-      <div class="stats">
+      <div class="grid">
         ${items.map(([name, count]) => `
-          <section class="stat-card">
+          <section class="stat">
             <p>${esc(name)}</p>
-            <h2>${count}</h2>
+            <b>${count}</b>
           </section>
         `).join("")}
       </div>
-
       <section class="panel">
         <h3>স্বাগতম</h3>
         <p>AMC Economics Department Attendance App</p>
@@ -424,8 +412,7 @@
     let html = "";
 
     if (profile.role === "admin") {
-      html += formCard(
-        "নতুন শিক্ষার্থী যোগ করুন",
+      html += formCard("নতুন শিক্ষার্থী যোগ করুন",
         field("নাম", "name") +
         field("রোল নম্বর", "roll") +
         field("শিক্ষাবর্ষ / সেশন", "session") +
@@ -436,18 +423,13 @@
     html += `
       <section class="panel">
         <h3>শিক্ষার্থী তালিকা</h3>
-        ${table(
-          ["নাম", "রোল", "সেশন", "ইমেইল"],
+        ${table(["নাম", "রোল", "সেশন", "ইমেইল"],
           data.students.map(s => [
-            s.name || "",
-            s.roll || "",
-            s.session || "",
-            s.email || ""
+            s.name || "", s.roll || "", s.session || "", s.email || ""
           ])
         )}
       </section>
     `;
-
     return html;
   }
 
@@ -455,8 +437,7 @@
     let html = "";
 
     if (profile.role === "admin") {
-      html += formCard(
-        "নতুন কোর্স যোগ করুন",
+      html += formCard("নতুন কোর্স যোগ করুন",
         field("কোর্সের নাম", "name") +
         field("কোর্স কোড", "code") +
         field("বর্ষ", "year", "number") +
@@ -467,18 +448,13 @@
     html += `
       <section class="panel">
         <h3>কোর্স তালিকা</h3>
-        ${table(
-          ["কোর্সের নাম", "কোড", "বর্ষ", "ক্রেডিট"],
+        ${table(["কোর্সের নাম", "কোড", "বর্ষ", "ক্রেডিট"],
           data.courses.map(c => [
-            c.name || "",
-            c.code || "",
-            c.year || "",
-            c.credit || ""
+            c.name || "", c.code || "", c.year || "", c.credit || ""
           ])
         )}
       </section>
     `;
-
     return html;
   }
 
@@ -486,8 +462,7 @@
     let html = "";
 
     if (profile.role === "admin") {
-      html += formCard(
-        "নতুন সেশন যোগ করুন",
+      html += formCard("নতুন সেশন যোগ করুন",
         field("সেশনের নাম", "name") +
         field("শুরুর তারিখ", "startDate", "date") +
         field("শেষের তারিখ", "endDate", "date")
@@ -497,17 +472,13 @@
     html += `
       <section class="panel">
         <h3>সেশন তালিকা</h3>
-        ${table(
-          ["সেশন", "শুরুর তারিখ", "শেষের তারিখ"],
+        ${table(["সেশন", "শুরুর তারিখ", "শেষের তারিখ"],
           data.sessions.map(s => [
-            s.name || "",
-            s.startDate || "",
-            s.endDate || ""
+            s.name || "", s.startDate || "", s.endDate || ""
           ])
         )}
       </section>
     `;
-
     return html;
   }
 
@@ -515,10 +486,10 @@
     let html = "";
 
     if (profile.role !== "student") {
-      html += formCard(
-        "নতুন নোটিশ",
+      html += formCard("নতুন নোটিশ",
         field("নোটিশের শিরোনাম", "title") +
-        `<label class="field"><span>বিস্তারিত</span><textarea name="body" required></textarea></label>`
+        `<label class="field"><span>বিস্তারিত</span>
+          <textarea name="body" required></textarea></label>`
       );
     }
 
@@ -526,23 +497,21 @@
       <section class="panel">
         <h3>নোটিশ বোর্ড</h3>
         ${data.notices.length ? data.notices.map(n => `
-          <article class="notice-card">
+          <article class="panel">
             <h4>${esc(n.title || "নোটিশ")}</h4>
             <p>${esc(n.body || "")}</p>
           </article>
         `).join("") : "<p>এখনো কোনো নোটিশ নেই।</p>"}
       </section>
     `;
-
     return html;
-}function attendancePage(data) {
-    const students = data.students;
+  }
 
+  function attendancePage(data) {
     let html = "";
 
     if (profile.role !== "student") {
-      html += formCard(
-        "হাজিরা এন্ট্রি",
+      html += formCard("হাজিরা এন্ট্রি",
         field("তারিখ", "date", "date") +
         field("কোর্স কোড", "courseCode") +
         field("শিক্ষার্থীর রোল", "roll") +
@@ -561,21 +530,16 @@
     html += `
       <section class="panel">
         <h3>${profile.role === "student" ? "আমার হাজিরা" : "হাজিরা রিপোর্ট"}</h3>
-        ${table(
-          ["তারিখ", "রোল", "কোর্স", "অবস্থা"],
+        ${table(["তারিখ", "রোল", "কোর্স", "অবস্থা"],
           records.map(a => [
-            a.date || "",
-            a.roll || "",
-            a.courseCode || "",
+            a.date || "", a.roll || "", a.courseCode || "",
             a.status === "present" ? "উপস্থিত" :
             a.status === "absent" ? "অনুপস্থিত" :
-            a.status === "late" ? "বিলম্বে উপস্থিত" :
-            a.status || ""
+            a.status === "late" ? "বিলম্বে উপস্থিত" : a.status || ""
           ])
         )}
       </section>
     `;
-
     return html;
   }
 
@@ -583,8 +547,7 @@
     let html = "";
 
     if (profile.role !== "student") {
-      html += formCard(
-        "নম্বর এন্ট্রি",
+      html += formCard("নম্বর এন্ট্রি",
         field("শিক্ষার্থীর রোল", "roll") +
         field("কোর্স কোড", "courseCode") +
         field("পরীক্ষার নাম", "exam") +
@@ -600,19 +563,14 @@
     html += `
       <section class="panel">
         <h3>${profile.role === "student" ? "আমার নম্বর" : "নম্বর তালিকা"}</h3>
-        ${table(
-          ["রোল", "কোর্স", "পরীক্ষা", "প্রাপ্ত নম্বর", "পূর্ণ নম্বর"],
+        ${table(["রোল", "কোর্স", "পরীক্ষা", "প্রাপ্ত নম্বর", "পূর্ণ নম্বর"],
           records.map(m => [
-            m.roll || "",
-            m.courseCode || "",
-            m.exam || "",
-            m.score ?? "",
-            m.total ?? ""
+            m.roll || "", m.courseCode || "", m.exam || "",
+            m.score ?? "", m.total ?? ""
           ])
         )}
       </section>
     `;
-
     return html;
   }
 
@@ -621,33 +579,26 @@
       const records = data.attendance.filter(a =>
         String(a.roll || "") === String(student.roll || "")
       );
-
       const present = records.filter(a => a.status === "present").length;
       const total = records.length;
       const percent = total ? Math.round(present / total * 100) : 0;
 
       return [
-        student.name || "",
-        student.roll || "",
-        total,
-        present,
-        percent + "%"
+        student.name || "", student.roll || "",
+        total, present, percent + "%"
       ];
     });
 
     return `
       <section class="panel">
         <h3>শিক্ষার্থীদের হাজিরা রিপোর্ট</h3>
-        ${table(
-          ["নাম", "রোল", "মোট এন্ট্রি", "উপস্থিত", "শতকরা"],
-          rows
-        )}
+        ${table(["নাম", "রোল", "মোট এন্ট্রি", "উপস্থিত", "শতকরা"], rows)}
         <button type="button" id="exportReport">CSV রিপোর্ট ডাউনলোড</button>
       </section>
     `;
   }
 
-  function backupPage(data) {
+  function backupPage() {
     return `
       <section class="panel">
         <h3>ডেটা ব্যাকআপ</h3>
@@ -655,6 +606,18 @@
         <button type="button" id="downloadBackup">JSON ব্যাকআপ ডাউনলোড</button>
       </section>
     `;
+  }
+
+  function downloadFile(content, filename, type) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   }
 
   function exportCSV(data) {
@@ -668,13 +631,9 @@
         const percent = records.length
           ? Math.round(present / records.length * 100)
           : 0;
-
         return [
-          student.name || "",
-          student.roll || "",
-          records.length,
-          present,
-          percent + "%"
+          student.name || "", student.roll || "",
+          records.length, present, percent + "%"
         ];
       })
     ];
@@ -688,26 +647,13 @@
     downloadFile(csv, "attendance-report.csv", "text/csv;charset=utf-8");
   }
 
-  function downloadFile(content, filename, type) {
-    const blob = new Blob([content], { type });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    URL.revokeObjectURL(url);
-  }
-
   async function render() {
     if (!profile || !db) return;
 
-    const content = $("content");
+    const content = $("view");
+
     if (!content) {
-      console.error("HTML-এ id='content' পাওয়া যায়নি।");
+      console.error("HTML-এ id='view' পাওয়া যায়নি।");
       return;
     }
 
@@ -715,75 +661,65 @@
 
     try {
       const data = await getData();
-
       if (!profile) return;
 
       switch (active) {
         case "dashboard":
           content.innerHTML = dashboard(data);
           break;
-
         case "students":
           content.innerHTML = studentsPage(data);
           break;
-
         case "teachers":
           content.innerHTML = `
             <section class="panel">
               <h3>প্রোফাইল ও ব্যবহারকারী</h3>
               <p>নতুন শিক্ষক বা শিক্ষার্থী যোগ করতে Firebase Authentication-এ অ্যাকাউন্ট তৈরি করে profiles কালেকশনে UID-সহ role দিতে হবে।</p>
-              ${table(
-                ["নাম", "ইমেইল", "ভূমিকা"],
+              ${table(["নাম", "ইমেইল", "ভূমিকা"],
                 data.profiles.map(p => [
-                  p.name || "",
-                  p.email || "",
-                  roleBn(p.role || "")
+                  p.name || "", p.email || "", roleBn(p.role || "")
                 ])
               )}
             </section>
           `;
           break;
-
         case "courses":
           content.innerHTML = coursesPage(data);
           break;
-
         case "sessions":
           content.innerHTML = sessionsPage(data);
           break;
-
         case "attendance":
         case "myattendance":
           content.innerHTML = attendancePage(data);
           break;
-
         case "notices":
           content.innerHTML = noticesPage(data);
           break;
-
         case "marks":
         case "mymarks":
           content.innerHTML = marksPage(data);
           break;
-
         case "reports":
           content.innerHTML = reportsPage(data);
           break;
-
         case "backup":
           content.innerHTML = backupPage(data);
           break;
-
         default:
           content.innerHTML = dashboard(data);
       }
 
-      attachForm(active === "students" ? "students" :
-        active === "courses" ? "courses" :
-        active === "sessions" ? "sessions" :
-        active === "notices" ? "notices" :
-        active === "attendance" ? "attendance" :
-        active === "marks" ? "marks" : "");
+      const collectionMap = {
+        students: "students",
+        courses: "courses",
+        sessions: "sessions",
+        notices: "notices"
+      };
+
+      if (collectionMap[active]) {
+        attachForm(collectionMap[active]);
+      }
 
       if (active === "attendance") {
         const form = content.querySelector(".data-form");
@@ -794,7 +730,6 @@
 
           form.onsubmit = async event => {
             event.preventDefault();
-
             const values = new FormData(form);
             const roll = String(values.get("roll") || "").trim();
             const student = data.students.find(s =>
@@ -815,10 +750,7 @@
                 studentUid: student.uid || "",
                 status: values.get("status")
               });
-
-              form.querySelector(".form-message").textContent =
-                "হাজিরা সংরক্ষিত হয়েছে।";
-
+              alert("হাজিরা সংরক্ষিত হয়েছে।");
               await render();
             } catch (error) {
               form.querySelector(".form-message").textContent =
@@ -834,7 +766,6 @@
         if (form) {
           form.onsubmit = async event => {
             event.preventDefault();
-
             const values = new FormData(form);
             const roll = String(values.get("roll") || "").trim();
             const student = data.students.find(s =>
@@ -853,9 +784,7 @@
             if (
               !Number.isFinite(score) ||
               !Number.isFinite(total) ||
-              score < 0 ||
-              total <= 0 ||
-              score > total
+              score < 0 || total <= 0 || score > total
             ) {
               form.querySelector(".form-message").textContent =
                 "নম্বর সঠিকভাবে দিন। প্রাপ্ত নম্বর পূর্ণ নম্বরের বেশি হতে পারবে না।";
@@ -871,10 +800,7 @@
                 score,
                 total
               });
-
-              form.querySelector(".form-message").textContent =
-                "নম্বর সংরক্ষিত হয়েছে।";
-
+              alert("নম্বর সংরক্ষিত হয়েছে।");
               await render();
             } catch (error) {
               form.querySelector(".form-message").textContent =
@@ -885,21 +811,16 @@
       }
 
       const exportButton = $("exportReport");
-      if (exportButton) {
-        exportButton.onclick = () => exportCSV(data);
-      }
+      if (exportButton) exportButton.onclick = () => exportCSV(data);
 
       const backupButton = $("downloadBackup");
       if (backupButton) {
-        backupButton.onclick = () => {
-          downloadFile(
-            JSON.stringify(data, null, 2),
-            "amc-attendance-backup.json",
-            "application/json"
-          );
-        };
+        backupButton.onclick = () => downloadFile(
+          JSON.stringify(data, null, 2),
+          "amc-attendance-backup.json",
+          "application/json"
+        );
       }
-
     } catch (error) {
       console.error(error);
       content.innerHTML =
