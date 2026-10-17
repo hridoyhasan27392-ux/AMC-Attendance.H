@@ -1,77 +1,911 @@
-/* AMC Attendance — Firebase Auth + Firestore
-   All authorization must be enforced again in Firestore Security Rules.
-*/
+/* AMC Economics Attendance */
 (() => {
   "use strict";
+
   const $ = id => document.getElementById(id);
   const config = window.AMC_FIREBASE_CONFIG || {};
-  const configured = config.apiKey && !config.apiKey.startsWith("PASTE_") &&
-                     config.projectId && !config.projectId.startsWith("PASTE_") &&
-                     config.appId && !config.appId.startsWith("PASTE_");
-  let auth, db, currentUser = null, profile = null, active = "dashboard";
+
+  let auth = null;
+  let db = null;
+  let currentUser = null;
+  let profile = null;
+  let active = "dashboard";
+  let profileCheckId = 0;
+
+  const configured = Boolean(
+    config.apiKey &&
+    config.projectId &&
+    config.appId &&
+    !String(config.apiKey).startsWith("PASTE_") &&
+    !String(config.projectId).startsWith("PASTE_") &&
+    !String(config.appId).startsWith("PASTE_")
+  );
+
   const tabs = {
-    admin: [["dashboard","ড্যাশবোর্ড"],["students","শিক্ষার্থী"],["teachers","শিক্ষক"],["courses","কোর্স"],["sessions","সেশন"],["attendance","হাজিরা"],["notices","নোটিশ"],["marks","নম্বর"],["reports","রিপোর্ট"],["backup","ব্যাকআপ"]],
-    teacher: [["dashboard","ড্যাশবোর্ড"],["students","শিক্ষার্থী তালিকা"],["attendance","হাজিরা নেওয়া"],["notices","নোটিশ"],["marks","নম্বর"],["reports","রিপোর্ট"]],
-    student: [["dashboard","ড্যাশবোর্ড"],["myattendance","আমার হাজিরা"],["notices","নোটিশ"],["mymarks","আমার নম্বর"]]
+    admin: [
+      ["dashboard", "ড্যাশবোর্ড"],
+      ["students", "শিক্ষার্থী"],
+      ["teachers", "শিক্ষক ও ব্যবহারকারী"],
+      ["courses", "কোর্স"],
+      ["sessions", "সেশন"],
+      ["attendance", "হাজিরা"],
+      ["notices", "নোটিশ"],
+      ["marks", "নম্বর"],
+      ["reports", "রিপোর্ট"],
+      ["backup", "ব্যাকআপ"]
+    ],
+    teacher: [
+      ["dashboard", "ড্যাশবোর্ড"],
+      ["students", "শিক্ষার্থী তালিকা"],
+      ["attendance", "হাজিরা নেওয়া"],
+      ["notices", "নোটিশ"],
+      ["marks", "নম্বর"],
+      ["reports", "রিপোর্ট"]
+    ],
+    student: [
+      ["dashboard", "ড্যাশবোর্ড"],
+      ["myattendance", "আমার হাজিরা"],
+      ["notices", "নোটিশ"],
+      ["mymarks", "আমার নম্বর"]
+    ]
   };
-  const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const today = () => new Date().toLocaleDateString("en-CA");
-  const msg = (s, error=false) => { $("loginMsg").textContent=s; $("loginMsg").style.color=error?"var(--danger)":"#15803d"; };
-  const notice = s => { $("setupNotice").textContent=s; $("setupNotice").classList.remove("hidden"); };
-  const showErr = e => alert(e?.message || String(e));
-  if (!configured) notice("সেটআপ বাকি: config.js ফাইলে Firebase Web App config বসাও, Firebase Authentication-এ Email/Password চালু করো এবং firestore.rules প্রকাশ করো।");
-  else {
-    try { firebase.initializeApp(config); auth=firebase.auth(); db=firebase.firestore(); auth.onAuthStateChanged(loadProfile); }
-    catch(e) { notice("Firebase শুরু করা যায়নি: "+e.message); }
+
+  const esc = value =>
+    String(value ?? "").replace(/[&<>"']/g, char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[char]));
+
+  const today = () => {
+    const d = new Date();
+    return [
+      d.getFullYear(),
+      String(d.getMonth() + 1).padStart(2, "0"),
+      String(d.getDate()).padStart(2, "0")
+    ].join("-");
+  };
+
+  function message(text, error = false) {
+    const el = $("loginMsg");
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = error ? "#dc2626" : "#15803d";
   }
-  $("themeBtn").onclick=()=>{document.body.classList.toggle("dark");localStorage.setItem("amc-theme",document.body.classList.contains("dark")?"dark":"light");};
-  if(localStorage.getItem("amc-theme")==="dark") document.body.classList.add("dark");
-  $("loginForm").onsubmit=async e=>{e.preventDefault();if(!auth){msg("আগে config.js সেটআপ করতে হবে।",true);return;}msg("লগইন হচ্ছে…");try{await auth.signInWithEmailAndPassword($("email").value.trim(),$("password").value);}catch(err){msg("লগইন হয়নি: "+err.message,true);}};
-  $("logoutBtn").onclick=()=>auth?.signOut();
-  async function loadProfile(user){
-    currentUser=user; profile=null;
-    if(!user){$("app").classList.add("hidden");$("loginCard").classList.remove("hidden");return;}
-    try{
-      const snap=await db.collection("profiles").doc(user.uid).get();
-      if(!snap.exists){await auth.signOut();msg("এই অ্যাকাউন্টের profile নেই। Admin-কে profile ও role তৈরি করতে বলুন।",true);return;}
-      profile=snap.data();
-      if(!["admin","teacher","student"].includes(profile.role)){await auth.signOut();msg("অনুমোদিত role নেই।",true);return;}
-      $("loginCard").classList.add("hidden");$("app").classList.remove("hidden");
-      $("welcomeTitle").textContent=(profile.name||user.email)+" — "+roleBn(profile.role);
-      $("userLine").textContent=user.email+" · "+roleBn(profile.role);
-      buildNav(); await render();
-    }catch(e){showErr(e);await auth.signOut();}
+
+  function showNotice(text) {
+    const el = $("setupNotice");
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove("hidden");
   }
-  function roleBn(r){return ({admin:"অ্যাডমিন",teacher:"শিক্ষক",student:"শিক্ষার্থী"})[r]||r;}
-  function buildNav(){
-    $("nav").innerHTML=(tabs[profile.role]||[]).map(([id,label])=>`<button data-tab="${id}" class="${id===active?"active":""}">${label}</button>`).join("");
-    $("nav").querySelectorAll("button").forEach(b=>b.onclick=async()=>{active=b.dataset.tab;buildNav();await render();});
+
+  function showError(error) {
+    console.error(error);
+    alert(error?.message || String(error));
   }
-  async function all(col){const s=await db.collection(col).orderBy("createdAt","desc").limit(500).get().catch(()=>db.collection(col).limit(500).get());return s.docs.map(d=>({id:d.id,...d.data()}));}
-  async function add(col,data){data.createdAt=firebase.firestore.FieldValue.serverTimestamp();data.createdBy=currentUser.uid;await db.collection(col).add(data);}
-  async function render(){
-    const v=$("view");v.innerHTML="<p>লোড হচ্ছে…</p>";
-    try{
-      if(active==="dashboard"){const [students,attendance,courses,notices]=await Promise.all([all("students"),all("attendance"),all("courses"),all("notices")]);v.innerHTML=`<h2>ড্যাশবোর্ড</h2><div class="grid">${stat("শিক্ষার্থী",students.length)}${stat("হাজিরা রেকর্ড",attendance.length)}${stat("কোর্স",courses.length)}${stat("নোটিশ",notices.length)}</div><p class="small">ডেটা Firebase থেকে লোড হচ্ছে। আপনার role অনুযায়ী অনুমতি প্রযোজ্য।</p>`;return;}
-      if(active==="students"){const rows=await all("students");v.innerHTML=`<h2>শিক্ষার্থী</h2>${profile.role==="admin"?`<form id="addStudent" class="inline-form"><label>নাম<input name="name" required></label><label>রোল/আইডি<input name="studentId" required></label><label>বিভাগ<input name="department" value="Economics"></label><label>সেশন<input name="session" placeholder="2024-25"></label><button>যোগ করুন</button></form>`:""}${table(["নাম","রোল/আইডি","বিভাগ","সেশন"],rows.map(x=>[x.name,x.studentId,x.department,x.session]))}`;form("addStudent",async d=>{await add("students",d);await render();});return;}
-      if(active==="teachers"){const rows=await all("profiles");v.innerHTML=`<h2>শিক্ষক/ব্যবহারকারী</h2><p class="small">নিরাপত্তার কারণে এই প্যানেল থেকে Auth account তৈরি হয় না। Firebase Authentication-এ account তৈরি করে UID-সহ profiles collection-এ role নির্ধারণ করতে হবে।</p>${table(["নাম","ইমেইল","Role"],rows.map(x=>[x.name,x.email,x.role]))}`;return;}
-      if(active==="courses"){const rows=await all("courses");v.innerHTML=`<h2>কোর্স</h2>${profile.role==="admin"?`<form id="addCourse" class="inline-form"><label>কোর্স কোড<input name="code" required></label><label>কোর্সের নাম<input name="name" required></label><label>শিক্ষক UID<input name="teacherUid"></label><button>কোর্স যোগ</button></form>`:""}${table(["কোড","কোর্স","শিক্ষক UID"],rows.map(x=>[x.code,x.name,x.teacherUid]))}`;form("addCourse",async d=>{await add("courses",d);await render();});return;}
-      if(active==="sessions"){const rows=await all("sessions");v.innerHTML=`<h2>সেশন</h2>${profile.role==="admin"?`<form id="addSession" class="inline-form"><label>সেশনের নাম<input name="name" required placeholder="2024-25"></label><label>শুরু<input name="startDate" type="date"></label><label>শেষ<input name="endDate" type="date"></label><button>সেশন যোগ</button></form>`:""}${table(["সেশন","শুরু","শেষ"],rows.map(x=>[x.name,x.startDate,x.endDate]))}`;form("addSession",async d=>{await add("sessions",d);await render();});return;}
-      if(active==="attendance"){const students=await all("students"),courses=await all("courses"),rows=await all("attendance");v.innerHTML=`<h2>হাজিরা</h2><form id="takeAttendance" class="inline-form"><label>শিক্ষার্থী<select name="studentRef" required>${students.map(s=>`<option value="${esc(s.id)}">${esc(s.name)} (${esc(s.studentId)})</option>`).join("")}</select></label><label>কোর্স<select name="courseRef"><option value="">সাধারণ</option>${courses.map(c=>`<option value="${esc(c.id)}">${esc(c.code)} - ${esc(c.name)}</option>`).join("")}</select></label><label>তারিখ<input type="date" name="date" value="${today()}" required></label><label>অবস্থা<select name="status"><option>Present</option><option>Absent</option><option>Late</option></select></label><button>হাজিরা সংরক্ষণ</button></form>${table(["তারিখ","শিক্ষার্থী","কোর্স","অবস্থা"],rows.map(x=>[x.date,x.studentName,x.courseName||"সাধারণ",x.status]))}`;form("takeAttendance",async d=>{const s=students.find(x=>x.id===d.studentRef),c=courses.find(x=>x.id===d.courseRef);if(!s)throw Error("আগে শিক্ষার্থী যোগ করুন");const dup=await db.collection("attendance").where("studentRef","==",s.id).where("date","==",d.date).get();if(!dup.empty)throw Error("এই তারিখে এই শিক্ষার্থীর হাজিরা আগে আছে");await add("attendance",{...d,studentName:s.name,studentId:s.studentId,courseName:c?.name||"",teacherUid:currentUser.uid});await render();});return;}
-      if(active==="myattendance"){const rows=await all("attendance");const mine=rows.filter(x=>x.studentUid===currentUser.uid||x.studentRef===profile.studentRef);v.innerHTML=`<h2>আমার হাজিরা</h2>${table(["তারিখ","কোর্স","অবস্থা"],mine.map(x=>[x.date,x.courseName||"সাধারণ",x.status]))}`;return;}
-      if(active==="notices"){const rows=await all("notices");v.innerHTML=`<h2>নোটিশ</h2>${profile.role!=="student"?`<form id="addNotice"><label>শিরোনাম<input name="title" required></label><label>বিস্তারিত<textarea name="body" required></textarea></label><button class="primary">নোটিশ প্রকাশ</button></form>`:""}${rows.map(x=>`<article class="stat"><h3>${esc(x.title)}</h3><p>${esc(x.body)}</p><small>${esc(x.authorName||"AMC")}</small></article>`).join("")||'<p class="empty">এখনো কোনো নোটিশ নেই।</p>'}`;form("addNotice",async d=>{d.authorName=profile.name||currentUser.email;await add("notices",d);await render();});return;}
-      if(active==="marks"){const students=await all("students"),rows=await all("marks");v.innerHTML=`<h2>নম্বর</h2><form id="addMark" class="inline-form"><label>শিক্ষার্থী<select name="studentRef">${students.map(s=>`<option value="${esc(s.id)}">${esc(s.name)} (${esc(s.studentId)})</option>`).join("")}</select></label><label>বিষয়/কোর্স<input name="courseName" required></label><label>নম্বর<input name="score" type="number" min="0" required></label><button>নম্বর যোগ</button></form>${table(["শিক্ষার্থী","কোর্স","নম্বর"],rows.map(x=>[x.studentName,x.courseName,x.score]))}`;form("addMark",async d=>{const s=students.find(x=>x.id===d.studentRef);if(!s)throw Error("আগে শিক্ষার্থী যোগ করুন");await add("marks",{...d,studentName:s.name,studentUid:s.uid||"",teacherUid:currentUser.uid,score:Number(d.score)});await render();});return;}
-      if(active==="mymarks"){const rows=await all("marks");v.innerHTML=`<h2>আমার নম্বর</h2>${table(["কোর্স","নম্বর"],rows.filter(x=>x.studentUid===currentUser.uid||x.studentRef===profile.studentRef).map(x=>[x.courseName,x.score]))}`;return;}
-      if(active==="reports"){const rows=await all("attendance");const csv="তারিখ,শিক্ষার্থী,রোল,কোর্স,অবস্থা\\n"+rows.map(x=>[x.date,x.studentName,x.studentId,x.courseName,x.status].map(csvCell).join(",")).join("\\n");v.innerHTML=`<h2>রিপোর্ট</h2><p>মোট হাজিরা রেকর্ড: <b>${rows.length}</b></p><button id="exportCsv">CSV ডাউনলোড</button>${table(["তারিখ","শিক্ষার্থী","রোল","অবস্থা"],rows.map(x=>[x.date,x.studentName,x.studentId,x.status]))}`;$("exportCsv").onclick=()=>download("attendance.csv","\\ufeff"+csv,"text/csv;charset=utf-8");return;}
-      if(active==="backup"){if(profile.role!=="admin"){v.innerHTML="<p>এই প্যানেল শুধু অ্যাডমিনের জন্য।</p>";return;}v.innerHTML=`<h2>ব্যাকআপ ও রিস্টোর</h2><p>ব্যাকআপে শিক্ষার্থী, কোর্স, সেশন, হাজিরা, নোটিশ ও নম্বর থাকবে। JSON ফাইল নিরাপদে রাখুন।</p><div class="actions"><button id="backupBtn">Backup ডাউনলোড</button><label class="small">JSON ব্যাকআপ বেছে নিন<input id="restoreFile" type="file" accept=".json,application/json"></label></div><p class="small">Restore নতুন রেকর্ড যোগ করবে; বিদ্যমান রেকর্ড মুছে ফেলবে না।</p>`;$("backupBtn").onclick=backup;$("restoreFile").onchange=restore;return;}
-      v.innerHTML="<h2>পেজ পাওয়া যায়নি</h2>";
-    }catch(e){v.innerHTML=`<h2>তথ্য লোড হয়নি</h2><p class="message">${esc(e.message)}</p><p class="small">Firebase Console-এর Firestore Rules ও user role পরীক্ষা করুন।</p>`;}
+
+  function roleBn(role) {
+    return ({
+      admin: "অ্যাডমিন",
+      teacher: "শিক্ষক",
+      student: "শিক্ষার্থী"
+    })[role] || role;
   }
-  function stat(name,n){return `<div class="stat"><span>${name}</span><b>${n}</b></div>`;}
-  function table(head,rows){if(!rows.length)return '<p class="empty">কোনো তথ্য পাওয়া যায়নি।</p>';return `<div class="table-wrap"><table><thead><tr>${head.map(x=>`<th>${esc(x)}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(x=>`<td>${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;}
-  function form(id,callback){const f=$(id);if(!f)return;f.onsubmit=async e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f).entries());const btn=f.querySelector("button");btn.disabled=true;try{await callback(d);}catch(err){alert(err.message||String(err));}finally{if(btn)btn.disabled=false;}};}
-  function csvCell(x){return '"'+String(x??"").replace(/"/g,'""')+'"';}
-  function download(name,content,type){const a=document.createElement("a"),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
-  async function backup(){try{const out={format:"AMC-Attendance-Backup-v1",exportedAt:new Date().toISOString(),collections:{}};for(const c of ["students","courses","sessions","attendance","notices","marks"]){out.collections[c]=(await all(c)).map(({id,...d})=>({id,...d}));}download("amc-attendance-backup.json",JSON.stringify(out,null,2),"application/json");}catch(e){showErr(e);}}
-  async function restore(ev){const f=ev.target.files?.[0];if(!f)return;if(!confirm("ব্যাকআপের রেকর্ডগুলো যোগ করবেন?")){ev.target.value="";return;}try{const data=JSON.parse(await f.text());if(data.format!=="AMC-Attendance-Backup-v1"||!data.collections)throw Error("সঠিক AMC JSON ব্যাকআপ নয়");for(const [col,items] of Object.entries(data.collections)){if(!["students","courses","sessions","attendance","notices","marks"].includes(col))continue;for(const item of items||[]){const {id,...d}=item;await db.collection(col).add({...d,restoredAt:firebase.firestore.FieldValue.serverTimestamp(),restoredBy:currentUser.uid});}}alert("Restore সম্পন্ন হয়েছে।");await render();}catch(e){showErr(e);}finally{ev.target.value="";}}
+
+  function initializeFirebase() {
+    if (!configured) {
+      showNotice("config.js ফাইলে Firebase সেটআপ পরীক্ষা করুন।");
+      return;
+    }
+
+    if (typeof firebase === "undefined") {
+      showNotice("Firebase SDK লোড হয়নি। ইন্টারনেট পরীক্ষা করুন।");
+      return;
+    }
+
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(config);
+      }
+
+      auth = firebase.auth();
+      db = firebase.firestore();
+
+      auth.onAuthStateChanged(loadProfile);
+    } catch (error) {
+      console.error(error);
+      showNotice("Firebase শুরু করা যায়নি: " + error.message);
+    }
+  }
+
+  if ($("themeBtn")) {
+    $("themeBtn").onclick = () => {
+      document.body.classList.toggle("dark");
+      localStorage.setItem(
+        "amc-theme",
+        document.body.classList.contains("dark") ? "dark" : "light"
+      );
+    };
+  }
+
+  if (localStorage.getItem("amc-theme") === "dark") {
+    document.body.classList.add("dark");
+  }
+
+  $("loginForm").onsubmit = async event => {
+    event.preventDefault();
+
+    if (!auth) {
+      message("Firebase সংযোগ প্রস্তুত নয়।", true);
+      return;
+    }
+
+    message("লগইন হচ্ছে…");
+
+    try {
+      await auth.signInWithEmailAndPassword(
+        $("email").value.trim(),
+        $("password").value
+      );
+    } catch (error) {
+      console.error(error);
+      message("লগইন হয়নি: " + error.message, true);
+    }
+  };
+
+  $("logoutBtn").onclick = async () => {
+    try {
+      if (auth) await auth.signOut();
+    } catch (error) {
+      showError(error);
+    }
+  };
+
+  async function loadProfile(user) {
+    const checkId = ++profileCheckId;
+    currentUser = user;
+    profile = null;
+
+    if (!user) {
+      $("app").classList.add("hidden");
+      $("loginCard").classList.remove("hidden");
+      return;
+    }
+
+    $("app").classList.add("hidden");
+    $("loginCard").classList.remove("hidden");
+    message("প্রোফাইল পরীক্ষা হচ্ছে…");
+
+    try {
+      console.log("Project ID:", config.projectId);
+      console.log("Logged-in UID:", user.uid);
+
+      const ref = db.collection("profiles").doc(user.uid);
+      console.log("Profile path:", ref.path);
+
+      const snap = await ref.get({ source: "server" });
+
+      if (checkId !== profileCheckId) return;
+
+      if (!snap.exists) {
+        message(
+          "প্রোফাইল পাওয়া যায়নি। Project: " +
+          config.projectId +
+          " | UID: " + user.uid +
+          " | Path: " + ref.path,
+          true
+        );
+        return;
+      }
+
+      const data = snap.data();
+      const role = String(data.role || "").trim().toLowerCase();
+
+      if (!["admin", "teacher", "student"].includes(role)) {
+        message("প্রোফাইল আছে, কিন্তু role সঠিক নয়: " + role, true);
+        return;
+      }
+
+      profile = { ...data, role };
+
+      $("loginCard").classList.add("hidden");
+      $("app").classList.remove("hidden");
+
+      $("welcomeTitle").textContent =
+        (profile.name || user.email) + " — " + roleBn(role);
+      $("userLine").textContent =
+        user.email + " · " + roleBn(role);
+
+      active = "dashboard";
+      buildNav();
+      await render();
+
+    } catch (error) {
+      if (checkId !== profileCheckId) return;
+      console.error("Profile error:", error);
+
+      message(
+        "Profile Error: " +
+        (error.code || "unknown") + " — " + error.message,
+        true
+      );
+    }
+       }function buildNav() {
+    const nav = $("menu");
+    if (!nav || !profile) return;
+
+    nav.innerHTML = "";
+
+    (tabs[profile.role] || []).forEach(([id, label]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = label;
+      button.className = id === active ? "active" : "";
+
+      button.onclick = async () => {
+        active = id;
+        buildNav();
+        await render();
+      };
+
+      nav.appendChild(button);
+    });
+  }
+
+  async function readCollection(name) {
+    const snap = await db.collection(name).get();
+    return snap.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  }
+
+  async function getData() {
+    const names = [
+      "students",
+      "profiles",
+      "courses",
+      "sessions",
+      "attendance",
+      "notices",
+      "marks"
+    ];
+
+    const result = {};
+
+    for (const name of names) {
+      try {
+        result[name] = await readCollection(name);
+      } catch (error) {
+        console.warn("Could not load " + name, error);
+        result[name] = [];
+      }
+    }
+
+    return result;
+  }
+
+  function table(headers, rows) {
+    return `
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>${headers.map(h => `<th>${esc(h)}</th>`).join("")}</tr>
+          </thead>
+          <tbody>
+            ${
+              rows.length
+                ? rows.map(row =>
+                    `<tr>${row.map(cell => `<td>${esc(cell)}</td>`).join("")}</tr>`
+                  ).join("")
+                : `<tr><td colspan="${headers.length}">কোনো তথ্য পাওয়া যায়নি</td></tr>`
+            }
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function field(label, name, type = "text", required = true) {
+    return `
+      <label class="field">
+        <span>${esc(label)}</span>
+        <input
+          name="${esc(name)}"
+          type="${esc(type)}"
+          ${required ? "required" : ""}
+        >
+      </label>
+    `;
+  }
+
+  function selectField(label, name, options) {
+    return `
+      <label class="field">
+        <span>${esc(label)}</span>
+        <select name="${esc(name)}" required>
+          <option value="">নির্বাচন করুন</option>
+          ${options.map(option =>
+            `<option value="${esc(option.value)}">${esc(option.label)}</option>`
+          ).join("")}
+        </select>
+      </label>
+    `;
+  }
+
+  function formCard(title, fields, button = "সংরক্ষণ করুন") {
+    return `
+      <section class="panel">
+        <h3>${esc(title)}</h3>
+        <form class="data-form">
+          ${fields}
+          <button type="submit">${esc(button)}</button>
+          <p class="form-message" aria-live="polite"></p>
+        </form>
+      </section>
+    `;
+  }
+
+  async function addDocument(collection, data) {
+    await db.collection(collection).add({
+      ...data,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: currentUser.uid
+    });
+  }
+
+  function attachForm(collection, transform = form => {
+    const data = {};
+    new FormData(form).forEach((value, key) => {
+      data[key] = value;
+    });
+    return data;
+  }) {
+    document.querySelectorAll(".data-form").forEach(form => {
+      form.onsubmit = async event => {
+        event.preventDefault();
+
+        const submit = form.querySelector('button[type="submit"]');
+        const msg = form.querySelector(".form-message");
+
+        submit.disabled = true;
+        msg.textContent = "সংরক্ষণ হচ্ছে…";
+
+        try {
+          const data = transform(form);
+          await addDocument(collection, data);
+          msg.textContent = "তথ্য সফলভাবে সংরক্ষিত হয়েছে।";
+          form.reset();
+          await render();
+        } catch (error) {
+          console.error(error);
+          msg.textContent =
+            "সংরক্ষণ হয়নি: " + (error.code || "") + " " + error.message;
+        } finally {
+          submit.disabled = false;
+        }
+      };
+    });
+  }
+
+  function dashboard(data) {
+    const items = [
+      ["শিক্ষার্থী", data.students.length],
+      ["কোর্স", data.courses.length],
+      ["সেশন", data.sessions.length],
+      ["হাজিরা রেকর্ড", data.attendance.length],
+      ["নোটিশ", data.notices.length],
+      ["নম্বর রেকর্ড", data.marks.length]
+    ];
+
+    return `
+      <div class="stats">
+        ${items.map(([name, count]) => `
+          <section class="stat-card">
+            <p>${esc(name)}</p>
+            <h2>${count}</h2>
+          </section>
+        `).join("")}
+      </div>
+
+      <section class="panel">
+        <h3>স্বাগতম</h3>
+        <p>AMC Economics Department Attendance App</p>
+        <p>আজকের তারিখ: ${today()}</p>
+        <p>আপনার ভূমিকা: ${roleBn(profile.role)}</p>
+      </section>
+    `;
+  }
+
+  function studentsPage(data) {
+    let html = "";
+
+    if (profile.role === "admin") {
+      html += formCard(
+        "নতুন শিক্ষার্থী যোগ করুন",
+        field("নাম", "name") +
+        field("রোল নম্বর", "roll") +
+        field("শিক্ষাবর্ষ / সেশন", "session") +
+        field("ইমেইল (ঐচ্ছিক)", "email", "email", false)
+      );
+    }
+
+    html += `
+      <section class="panel">
+        <h3>শিক্ষার্থী তালিকা</h3>
+        ${table(
+          ["নাম", "রোল", "সেশন", "ইমেইল"],
+          data.students.map(s => [
+            s.name || "",
+            s.roll || "",
+            s.session || "",
+            s.email || ""
+          ])
+        )}
+      </section>
+    `;
+
+    return html;
+  }
+
+  function coursesPage(data) {
+    let html = "";
+
+    if (profile.role === "admin") {
+      html += formCard(
+        "নতুন কোর্স যোগ করুন",
+        field("কোর্সের নাম", "name") +
+        field("কোর্স কোড", "code") +
+        field("বর্ষ", "year", "number") +
+        field("ক্রেডিট", "credit", "number")
+      );
+    }
+
+    html += `
+      <section class="panel">
+        <h3>কোর্স তালিকা</h3>
+        ${table(
+          ["কোর্সের নাম", "কোড", "বর্ষ", "ক্রেডিট"],
+          data.courses.map(c => [
+            c.name || "",
+            c.code || "",
+            c.year || "",
+            c.credit || ""
+          ])
+        )}
+      </section>
+    `;
+
+    return html;
+  }
+
+  function sessionsPage(data) {
+    let html = "";
+
+    if (profile.role === "admin") {
+      html += formCard(
+        "নতুন সেশন যোগ করুন",
+        field("সেশনের নাম", "name") +
+        field("শুরুর তারিখ", "startDate", "date") +
+        field("শেষের তারিখ", "endDate", "date")
+      );
+    }
+
+    html += `
+      <section class="panel">
+        <h3>সেশন তালিকা</h3>
+        ${table(
+          ["সেশন", "শুরুর তারিখ", "শেষের তারিখ"],
+          data.sessions.map(s => [
+            s.name || "",
+            s.startDate || "",
+            s.endDate || ""
+          ])
+        )}
+      </section>
+    `;
+
+    return html;
+  }
+
+  function noticesPage(data) {
+    let html = "";
+
+    if (profile.role !== "student") {
+      html += formCard(
+        "নতুন নোটিশ",
+        field("নোটিশের শিরোনাম", "title") +
+        `<label class="field"><span>বিস্তারিত</span><textarea name="body" required></textarea></label>`
+      );
+    }
+
+    html += `
+      <section class="panel">
+        <h3>নোটিশ বোর্ড</h3>
+        ${data.notices.length ? data.notices.map(n => `
+          <article class="notice-card">
+            <h4>${esc(n.title || "নোটিশ")}</h4>
+            <p>${esc(n.body || "")}</p>
+          </article>
+        `).join("") : "<p>এখনো কোনো নোটিশ নেই।</p>"}
+      </section>
+    `;
+
+    return html;
+}function attendancePage(data) {
+    const students = data.students;
+
+    let html = "";
+
+    if (profile.role !== "student") {
+      html += formCard(
+        "হাজিরা এন্ট্রি",
+        field("তারিখ", "date", "date") +
+        field("কোর্স কোড", "courseCode") +
+        field("শিক্ষার্থীর রোল", "roll") +
+        selectField("উপস্থিতি", "status", [
+          { value: "present", label: "উপস্থিত" },
+          { value: "absent", label: "অনুপস্থিত" },
+          { value: "late", label: "বিলম্বে উপস্থিত" }
+        ])
+      );
+    }
+
+    const records = profile.role === "student"
+      ? data.attendance.filter(a => a.studentUid === currentUser.uid)
+      : data.attendance;
+
+    html += `
+      <section class="panel">
+        <h3>${profile.role === "student" ? "আমার হাজিরা" : "হাজিরা রিপোর্ট"}</h3>
+        ${table(
+          ["তারিখ", "রোল", "কোর্স", "অবস্থা"],
+          records.map(a => [
+            a.date || "",
+            a.roll || "",
+            a.courseCode || "",
+            a.status === "present" ? "উপস্থিত" :
+            a.status === "absent" ? "অনুপস্থিত" :
+            a.status === "late" ? "বিলম্বে উপস্থিত" :
+            a.status || ""
+          ])
+        )}
+      </section>
+    `;
+
+    return html;
+  }
+
+  function marksPage(data) {
+    let html = "";
+
+    if (profile.role !== "student") {
+      html += formCard(
+        "নম্বর এন্ট্রি",
+        field("শিক্ষার্থীর রোল", "roll") +
+        field("কোর্স কোড", "courseCode") +
+        field("পরীক্ষার নাম", "exam") +
+        field("প্রাপ্ত নম্বর", "score", "number") +
+        field("পূর্ণ নম্বর", "total", "number")
+      );
+    }
+
+    const records = profile.role === "student"
+      ? data.marks.filter(m => m.studentUid === currentUser.uid)
+      : data.marks;
+
+    html += `
+      <section class="panel">
+        <h3>${profile.role === "student" ? "আমার নম্বর" : "নম্বর তালিকা"}</h3>
+        ${table(
+          ["রোল", "কোর্স", "পরীক্ষা", "প্রাপ্ত নম্বর", "পূর্ণ নম্বর"],
+          records.map(m => [
+            m.roll || "",
+            m.courseCode || "",
+            m.exam || "",
+            m.score ?? "",
+            m.total ?? ""
+          ])
+        )}
+      </section>
+    `;
+
+    return html;
+  }
+
+  function reportsPage(data) {
+    const rows = data.students.map(student => {
+      const records = data.attendance.filter(a =>
+        String(a.roll || "") === String(student.roll || "")
+      );
+
+      const present = records.filter(a => a.status === "present").length;
+      const total = records.length;
+      const percent = total ? Math.round(present / total * 100) : 0;
+
+      return [
+        student.name || "",
+        student.roll || "",
+        total,
+        present,
+        percent + "%"
+      ];
+    });
+
+    return `
+      <section class="panel">
+        <h3>শিক্ষার্থীদের হাজিরা রিপোর্ট</h3>
+        ${table(
+          ["নাম", "রোল", "মোট এন্ট্রি", "উপস্থিত", "শতকরা"],
+          rows
+        )}
+        <button type="button" id="exportReport">CSV রিপোর্ট ডাউনলোড</button>
+      </section>
+    `;
+  }
+
+  function backupPage(data) {
+    return `
+      <section class="panel">
+        <h3>ডেটা ব্যাকআপ</h3>
+        <p>Firestore থেকে পাওয়া তথ্য JSON ফাইল হিসেবে ডাউনলোড করুন।</p>
+        <button type="button" id="downloadBackup">JSON ব্যাকআপ ডাউনলোড</button>
+      </section>
+    `;
+  }
+
+  function exportCSV(data) {
+    const rows = [
+      ["Name", "Roll", "Total", "Present", "Percentage"],
+      ...data.students.map(student => {
+        const records = data.attendance.filter(a =>
+          String(a.roll || "") === String(student.roll || "")
+        );
+        const present = records.filter(a => a.status === "present").length;
+        const percent = records.length
+          ? Math.round(present / records.length * 100)
+          : 0;
+
+        return [
+          student.name || "",
+          student.roll || "",
+          records.length,
+          present,
+          percent + "%"
+        ];
+      })
+    ];
+
+    const csv = "\uFEFF" + rows.map(row =>
+      row.map(value =>
+        '"' + String(value).replace(/"/g, '""') + '"'
+      ).join(",")
+    ).join("\r\n");
+
+    downloadFile(csv, "attendance-report.csv", "text/csv;charset=utf-8");
+  }
+
+  function downloadFile(content, filename, type) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
+  async function render() {
+    if (!profile || !db) return;
+
+    const content = $("content");
+    if (!content) {
+      console.error("HTML-এ id='content' পাওয়া যায়নি।");
+      return;
+    }
+
+    content.innerHTML = "<p>তথ্য লোড হচ্ছে…</p>";
+
+    try {
+      const data = await getData();
+
+      if (!profile) return;
+
+      switch (active) {
+        case "dashboard":
+          content.innerHTML = dashboard(data);
+          break;
+
+        case "students":
+          content.innerHTML = studentsPage(data);
+          break;
+
+        case "teachers":
+          content.innerHTML = `
+            <section class="panel">
+              <h3>প্রোফাইল ও ব্যবহারকারী</h3>
+              <p>নতুন শিক্ষক বা শিক্ষার্থী যোগ করতে Firebase Authentication-এ অ্যাকাউন্ট তৈরি করে profiles কালেকশনে UID-সহ role দিতে হবে।</p>
+              ${table(
+                ["নাম", "ইমেইল", "ভূমিকা"],
+                data.profiles.map(p => [
+                  p.name || "",
+                  p.email || "",
+                  roleBn(p.role || "")
+                ])
+              )}
+            </section>
+          `;
+          break;
+
+        case "courses":
+          content.innerHTML = coursesPage(data);
+          break;
+
+        case "sessions":
+          content.innerHTML = sessionsPage(data);
+          break;
+
+        case "attendance":
+        case "myattendance":
+          content.innerHTML = attendancePage(data);
+          break;
+
+        case "notices":
+          content.innerHTML = noticesPage(data);
+          break;
+
+        case "marks":
+        case "mymarks":
+          content.innerHTML = marksPage(data);
+          break;
+
+        case "reports":
+          content.innerHTML = reportsPage(data);
+          break;
+
+        case "backup":
+          content.innerHTML = backupPage(data);
+          break;
+
+        default:
+          content.innerHTML = dashboard(data);
+      }
+
+      attachForm(active === "students" ? "students" :
+        active === "courses" ? "courses" :
+        active === "sessions" ? "sessions" :
+        active === "notices" ? "notices" :
+        active === "attendance" ? "attendance" :
+        active === "marks" ? "marks" : "");
+
+      if (active === "attendance") {
+        const form = content.querySelector(".data-form");
+
+        if (form) {
+          const dateInput = form.querySelector('[name="date"]');
+          if (dateInput) dateInput.value = today();
+
+          form.onsubmit = async event => {
+            event.preventDefault();
+
+            const values = new FormData(form);
+            const roll = String(values.get("roll") || "").trim();
+            const student = data.students.find(s =>
+              String(s.roll || "") === roll
+            );
+
+            if (!student) {
+              form.querySelector(".form-message").textContent =
+                "এই রোলের শিক্ষার্থী তালিকায় পাওয়া যায়নি।";
+              return;
+            }
+
+            try {
+              await addDocument("attendance", {
+                date: values.get("date"),
+                courseCode: values.get("courseCode"),
+                roll,
+                studentUid: student.uid || "",
+                status: values.get("status")
+              });
+
+              form.querySelector(".form-message").textContent =
+                "হাজিরা সংরক্ষিত হয়েছে।";
+
+              await render();
+            } catch (error) {
+              form.querySelector(".form-message").textContent =
+                "সমস্যা: " + error.message;
+            }
+          };
+        }
+      }
+
+      if (active === "marks") {
+        const form = content.querySelector(".data-form");
+
+        if (form) {
+          form.onsubmit = async event => {
+            event.preventDefault();
+
+            const values = new FormData(form);
+            const roll = String(values.get("roll") || "").trim();
+            const student = data.students.find(s =>
+              String(s.roll || "") === roll
+            );
+
+            if (!student) {
+              form.querySelector(".form-message").textContent =
+                "এই রোলের শিক্ষার্থী তালিকায় পাওয়া যায়নি।";
+              return;
+            }
+
+            const score = Number(values.get("score"));
+            const total = Number(values.get("total"));
+
+            if (
+              !Number.isFinite(score) ||
+              !Number.isFinite(total) ||
+              score < 0 ||
+              total <= 0 ||
+              score > total
+            ) {
+              form.querySelector(".form-message").textContent =
+                "নম্বর সঠিকভাবে দিন। প্রাপ্ত নম্বর পূর্ণ নম্বরের বেশি হতে পারবে না।";
+              return;
+            }
+
+            try {
+              await addDocument("marks", {
+                roll,
+                studentUid: student.uid || "",
+                courseCode: values.get("courseCode"),
+                exam: values.get("exam"),
+                score,
+                total
+              });
+
+              form.querySelector(".form-message").textContent =
+                "নম্বর সংরক্ষিত হয়েছে।";
+
+              await render();
+            } catch (error) {
+              form.querySelector(".form-message").textContent =
+                "সমস্যা: " + error.message;
+            }
+          };
+        }
+      }
+
+      const exportButton = $("exportReport");
+      if (exportButton) {
+        exportButton.onclick = () => exportCSV(data);
+      }
+
+      const backupButton = $("downloadBackup");
+      if (backupButton) {
+        backupButton.onclick = () => {
+          downloadFile(
+            JSON.stringify(data, null, 2),
+            "amc-attendance-backup.json",
+            "application/json"
+          );
+        };
+      }
+
+    } catch (error) {
+      console.error(error);
+      content.innerHTML =
+        `<section class="panel"><h3>তথ্য লোড করা যায়নি</h3><p>${esc(error.message)}</p></section>`;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", initializeFirebase);
 })();
