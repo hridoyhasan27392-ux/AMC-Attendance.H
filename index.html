@@ -1,84 +1,366 @@
-
 <!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#123c2c">
-  <meta name="description" content="AMC Economics Attendance Management System">
-  <title>AMC Attendance</title>
-
+  <meta name="theme-color" content="#5945e8">
+  <meta name="description" content="AMC Economics Department Attendance Management System">
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./style.css">
+  <title>AMC Economics Attendance</title>
+  <style>
+    :root{--primary:#5042e9;--text:#202938;--muted:#737d91;--card:#fff;--field:#eef2ff}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:system-ui,sans-serif;color:var(--text);background:linear-gradient(145deg,#5145e8,#902fe8,#e43da7)}
+    header{padding:14px 12px;background:#ffffff20;color:#fff;box-shadow:0 5px 20px #00000010}
+    .topbar{display:flex;align-items:center;gap:10px}
+    .brand{flex:0 0 auto;font-size:19px;font-weight:800;line-height:1.3}
+    .menu{display:flex;align-items:center;gap:7px;overflow-x:auto;flex:1;scrollbar-width:none}
+    .menu::-webkit-scrollbar{display:none}
+    .menu button{flex:0 0 auto;border:0;border-radius:13px;padding:10px 12px;font-size:14px;font-family:inherit;color:white;background:#ffffff30;cursor:pointer}
+    main{width:min(100% - 24px,650px);margin:30px auto;padding:26px 18px;border-radius:26px;background:var(--card);text-align:center;box-shadow:0 15px 45px #3c136520;min-height:260px}
+    .paper{font-size:60px;line-height:1.25}
+    h1{margin:6px 0 12px;font-size:clamp(28px,7vw,42px);line-height:1.3;font-weight:800}
+    h2{font-size:22px}
+    .subtitle{margin:0 auto 16px;color:var(--muted);font-size:15px;line-height:1.7}
+    label{display:block;text-align:left;margin-top:12px;font-weight:650}
+    input,select,textarea{display:block;width:100%;margin:8px 0;padding:13px 12px;border:2px solid #a8b5ff;border-radius:12px;background:var(--field);color:var(--text);font:inherit}
+    textarea{min-height:90px;resize:vertical}
+    .pin{padding:17px 8px;text-align:center;font-size:38px;letter-spacing:8px;font-weight:700}
+    .submit{display:block;width:100%;margin:12px 0;padding:14px 12px;border:0;border-radius:16px;background:var(--primary);color:#fff;font-family:inherit;font-size:19px;font-weight:800;cursor:pointer;box-shadow:0 8px 20px #5042e926}
+    .secondary{display:block;width:100%;margin:10px 0;padding:12px;border:1px solid #aab2c2;border-radius:12px;background:#f3f4f6;color:#202938;font:inherit;cursor:pointer}
+    .message{margin-top:14px;color:var(--primary);line-height:1.7;overflow-wrap:anywhere}
+    .hint{margin-top:20px;color:#929bad;font-size:13px;line-height:1.7}
+    .item{padding:12px;margin:9px 0;border:1px solid #e1e5ef;border-radius:12px;text-align:left;overflow-wrap:anywhere}
+    .item p{margin:4px 0}
+    footer{padding:15px;text-align:center;color:white;font-size:12px}
+    body.dark{--card:#202438;--text:#f4f5ff;--muted:#c0c6d9;--field:#30364e}
+    body.dark .secondary{background:#30364e;color:#f4f5ff;border-color:#59617b}
+    body.dark .item{border-color:#4b526b}
+    @media(max-width:380px){.brand{font-size:16px}.menu button{padding:9px;font-size:13px}main{padding:22px 14px;margin-top:22px}}
+  </style>
 </head>
 <body>
-  <header class="app-header">
-    <div>
-      <h1>AMC Attendance</h1>
-      <p>অর্থনীতি বিভাগ, আনন্দ মোহন কলেজ</p>
-    </div>
-    <button id="themeBtn" type="button" aria-label="থিম পরিবর্তন">
-      🌙
-    </button>
-  </header>
+<header>
+  <div class="topbar">
+    <div class="brand">🎓 AMC<br>অর্থনীতি</div>
+    <nav class="menu" aria-label="প্রধান মেনু">
+      <button id="themeButton" aria-label="থিম পরিবর্তন">🌙</button>
+      <button data-page="home">হোম</button>
+      <button data-page="admin">অ্যাডমিন</button>
+      <button data-page="teacher">শিক্ষক</button>
+      <button data-page="student">ছাত্র</button>
+      <button data-page="attendance">হাজিরা</button>
+      <button data-page="notices">নোটিশ</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <div class="paper">📝</div>
+  <h1>হাজিরা দিন</h1>
+  <p class="subtitle">শিক্ষকের দেওয়া ৪-ডিজিটের PIN লিখুন</p>
+  <form id="attendanceForm">
+    <input class="pin" id="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="0000" autocomplete="off" aria-label="চার ডিজিটের PIN" required>
+    <button class="submit" type="submit">সাবমিট</button>
+  </form>
+  <div class="message" id="message" role="status" aria-live="polite"></div>
+  <p class="hint">💡 এটি স্থানীয় ডেমো। প্রকৃত হাজিরার জন্য নিরাপদ সার্ভার ও অনলাইন ডেটাবেজ প্রয়োজন।</p>
+</main>
+<footer>AMC Economics Department<br>Attendance Management System</footer>
+<script>
+"use strict";
+const main=document.getElementById("main");
+const $=id=>document.getElementById(id);
+const get=key=>{try{return JSON.parse(localStorage.getItem("amc_"+key)||"[]")}catch{return []}};
+const save=(key,value)=>localStorage.setItem("amc_"+key,JSON.stringify(value));
+let loggedRole="",currentStudent=null;
 
-  <main class="container">
-    <div id="setupNotice" class="notice hidden" role="alert"></div>
-
-    <section id="loginCard" class="card">
-      <h2>লগইন</h2>
-      <p>আপনার অনুমোদিত অ্যাকাউন্ট দিয়ে প্রবেশ করুন।</p>
-
-      <form id="loginForm">
-        <label for="email">ইমেইল</label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autocomplete="username"
-          required
-        >
-
-        <label for="password">পাসওয়ার্ড</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autocomplete="current-password"
-          required
-        >
-
-        <button type="submit">লগইন করুন</button>
-        <p id="loginMsg" role="status" aria-live="polite"></p>
-      </form>
-    </section>
-
-    <section id="app" class="hidden">
-      <div class="card">
-        <h2 id="welcomeTitle">স্বাগতম</h2>
-        <p id="userLine"></p>
-        <button id="logoutBtn" type="button">লগআউট</button>
-      </div>
-
-      <nav id="nav" aria-label="প্রধান মেনু"></nav>
-
-      <section id="view" class="card" aria-live="polite">
-        <p>লোড হচ্ছে…</p>
-      </section>
-    </section>
-  </main>
-
-  <footer class="app-footer">
-    <p>AMC Attendance · Economics Department</p>
-  </footer>
-
-  <!-- Firebase SDK: app.js-এর আগে লোড হতে হবে -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-  <!-- প্রথমে Firebase Config, তারপর অ্যাপের JavaScript -->
-  <script src="./config.js"></script>
-  <script src="./app.js"></script>
+function setPage(title,subtitle=""){
+  main.replaceChildren();
+  main.append(make("div",{className:"paper"},"🎓"),make("h1",{},title));
+  if(subtitle)main.append(make("p",{className:"subtitle"},subtitle));
+}
+function make(tag,attrs={},text=""){
+  const node=document.createElement(tag);
+  Object.entries(attrs).forEach(([k,v])=>{if(k==="className")node.className=v;else node.setAttribute(k,v)});
+  if(text!=="")node.textContent=text;
+  return node;
+}
+function addField(parent,label,id,type="text",required=true){
+  parent.append(make("label",{for:id},label));
+  const input=make("input",{id,type});
+  if(required)input.required=true;
+  parent.append(input);return input;
+}
+function addArea(parent,label,id){
+  parent.append(make("label",{for:id},label));
+  const input=make("textarea",{id});input.required=true;parent.append(input);return input;
+}
+function addButton(parent,label,fn,cls="submit"){
+  const b=make("button",{type:"button",className:cls},label);
+  b.addEventListener("click",fn);parent.append(b);return b;
+}
+function addForm(parent,fn){
+  const f=make("form");
+  f.addEventListener("submit",e=>{e.preventDefault();fn(f)});
+  parent.append(f);return f;
+}
+function showList(parent,items,format,onDelete){
+  parent.append(make("h2",{},"তালিকা ("+items.length+")"));
+  if(!items.length){parent.append(make("p",{},"এখনো কোনো তথ্য যোগ করা হয়নি।"));return}
+  items.forEach((item,index)=>{
+    const box=make("div",{className:"item"});
+    box.append(make("p",{},format(item,index)));
+    if(onDelete)addButton(box,"মুছে ফেলুন",()=>{
+      if(confirm("এই তথ্যটি মুছে ফেলবেন?"))onDelete(index)
+    },"secondary");
+    parent.append(box);
+  });
+}
+function home(){
+  setPage("AMC অর্থনীতি","Attendance Management System");
+  addButton(main,"📝 হাজিরা দিন",()=>attendancePage());
+  addButton(main,"⚙️ অ্যাডমিন প্যানেল",()=>loginPage("admin"));
+  addButton(main,"👨‍🏫 শিক্ষক প্যানেল",()=>loginPage("teacher"));
+  addButton(main,"🎓 ছাত্র প্যানেল",()=>studentLogin());
+  addButton(main,"📢 নোটিশ দেখুন",()=>noticesPage(false));
+  main.append(make("p",{className:"hint"},"নোট: এই সংস্করণে তথ্য শুধু এই ব্রাউজারে সংরক্ষিত হয়।"));
+}
+function loginPage(role){
+  setPage(role==="admin"?"🔐 অ্যাডমিন লগইন":"👨‍🏫 শিক্ষক লগইন",
+    "ডেমো প্যানেল। প্রকৃত পরিচয় যাচাই এখনো যুক্ত হয়নি।");
+  const f=addForm(main,()=>{
+    alert("নিরাপদ লগইনের জন্য Firebase/Supabase বা নিজস্ব সার্ভার সেট করতে হবে। এই ফর্ম লগইন যাচাই করে না।");
+  });
+  addField(f,"ইমেইল","loginEmail","email");
+  addField(f,"পাসওয়ার্ড","loginPassword","password");
+  addButton(f,"ডেমো প্যানেল খুলুন",()=>{
+    loggedRole=role;
+    role==="admin"?adminPage():teacherPage();
+  });
+  addButton(main,"হোমে ফিরুন",home,"secondary");
+}
+function adminPage(){
+  setPage("⚙️ অ্যাডমিন প্যানেল","শিক্ষার্থী, সেশন, কোর্স ও রিপোর্ট পরিচালনা");
+  const f=addForm(main,f=>{
+    const name=f.querySelector("#sName").value.trim();
+    const roll=f.querySelector("#sRoll").value.trim();
+    const session=f.querySelector("#sSession").value.trim();
+    const pin=f.querySelector("#sPin").value.trim();
+    if(!/^\d{4}$/.test(pin)){alert("PIN অবশ্যই ৪ ডিজিট হতে হবে।");return}
+    const students=get("students");
+    if(students.some(s=>s.roll===roll&&s.session===session)){alert("এই সেশনে রোলটি আগে আছে।");return}
+    students.push({name,roll,session,pin});save("students",students);adminPage();
+  });
+  addField(f,"শিক্ষার্থীর নাম","sName");
+  addField(f,"শিক্ষার্থীর রোল","sRoll");
+  addField(f,"সেশন (যেমন 2024-25)","sSession");
+  addField(f,"শিক্ষার্থীর ৪ ডিজিট PIN","sPin","password");
+  addButton(f,"শিক্ষার্থী যোগ করুন",()=>f.requestSubmit());
+  showList(main,get("students"),s=>`${s.name} — রোল: ${s.roll} — সেশন: ${s.session}`,
+    i=>{const a=get("students");a.splice(i,1);save("students",a);adminPage()});
+  addButton(main,"কোর্স ম্যাপিং",coursesPage,"secondary");
+  addButton(main,"সেশন",sessionsPage,"secondary");
+  addButton(main,"রিপোর্ট",()=>reportPage("reports"),"secondary");
+  addButton(main,"নোটিশ",()=>noticesPage(true),"secondary");
+  addButton(main,"Backup",backupPage,"secondary");
+  addButton(main,"হোমে ফিরুন",home,"secondary");
+}
+function teacherPage(){
+  setPage("👨‍🏫 শিক্ষক প্যানেল","শিক্ষক কাজের মেনু");
+  [["হাজিরা দিন",attendancePage],["লাইভ রিপোর্ট",()=>reportPage("live")],
+   ["ম্যানুয়াল হাজিরা",manualPage],["নম্বর এন্ট্রি",marksPage],
+   ["কোর্স ম্যাপিং",coursesPage],["রিপোর্ট",()=>reportPage("reports")],
+   ["নোটিশ",()=>noticesPage(true)],["Tracking",()=>reportPage("tracking")],
+   ["হোমে ফিরুন",home]].forEach(([label,fn])=>addButton(main,label,fn));
+}
+function studentLogin(){
+  setPage("🎓 ছাত্র লগইন","সেশন ও রোল দিয়ে নিজের তথ্য খুঁজুন");
+  const f=addForm(main,f=>{
+    const roll=f.querySelector("#studentRoll").value.trim();
+    const session=f.querySelector("#studentSession").value.trim();
+    const s=get("students").find(x=>x.roll===roll&&x.session===session);
+    if(!s){alert("শিক্ষার্থী পাওয়া যায়নি।");return}
+    currentStudent=s;studentPage();
+  });
+  addField(f,"সেশন","studentSession");
+  addField(f,"ক্লাস রোল","studentRoll");
+  addButton(f,"লগইন",()=>f.requestSubmit());
+  addButton(main,"হোমে ফিরুন",home,"secondary");
+}
+function studentPage(){
+  setPage("🎓 ছাত্র প্যানেল",`${currentStudent.name} — রোল ${currentStudent.roll}`);
+  addButton(main,"আমার হাজিরা",()=>myAttendance());
+  addButton(main,"আমার কোর্স",()=>myCourses());
+  addButton(main,"নোটিশ",()=>noticesPage(false));
+  addButton(main,"লগআউট",()=>{currentStudent=null;home()},"secondary");
+}
+function attendancePage(){
+  setPage("📝 হাজিরা দিন","শিক্ষার্থীর ৪ ডিজিটের PIN লিখুন");
+  const f=addForm(main,f=>{
+    const pin=f.querySelector("#attPin").value.trim();
+    const s=get("students").find(x=>x.pin===pin);
+    if(!s){alert("PIN মেলেনি। অ্যাডমিন প্যানেলে শিক্ষার্থীর PIN যোগ করুন।");return}
+    const a=get("attendance");
+    const date=new Date().toLocaleDateString("en-CA");
+    if(a.some(r=>r.roll===s.roll&&r.date===date)){alert("আজকের হাজিরা ইতিমধ্যে দেওয়া হয়েছে।");return}
+    a.push({roll:s.roll,name:s.name,session:s.session,date,
+      time:new Date().toLocaleTimeString(),status:"উপস্থিত"});
+    save("attendance",a);alert("এই ব্রাউজারে ডেমো হাজিরা সংরক্ষণ হয়েছে।");home();
+  });
+  const pin=addField(f,"৪ ডিজিটের PIN","attPin","password");
+  pin.className="pin";pin.maxLength=4;pin.inputMode="numeric";
+  pin.addEventListener("input",()=>pin.value=pin.value.replace(/\D/g,"").slice(0,4));
+  addButton(f,"সাবমিট",()=>f.requestSubmit());
+  addButton(main,"হোমে ফিরুন",home,"secondary");
+}
+function coursesPage(){
+  if(!loggedRole){loginPage("teacher");return}
+  setPage("📚 কোর্স ম্যাপিং","কোর্স ও শিক্ষকের নাম যোগ করুন");
+  const f=addForm(main,f=>{
+    const course=f.querySelector("#courseName").value.trim();
+    const teacher=f.querySelector("#courseTeacher").value.trim();
+    const session=f.querySelector("#courseSession").value.trim();
+    const a=get("courses");a.push({course,teacher,session});save("courses",a);coursesPage();
+  });
+  addField(f,"কোর্সের নাম","courseName");
+  addField(f,"শিক্ষকের নাম","courseTeacher");
+  addField(f,"সেশন","courseSession");
+  addButton(f,"কোর্স যোগ করুন",()=>f.requestSubmit());
+  showList(main,get("courses"),x=>`${x.course} — শিক্ষক: ${x.teacher} — ${x.session}`,
+    i=>{const a=get("courses");a.splice(i,1);save("courses",a);coursesPage()});
+  addButton(main,"ফিরে যান",()=>loggedRole==="admin"?adminPage():teacherPage(),"secondary");
+}
+function sessionsPage(){
+  setPage("📅 সেশন পরিচালনা");
+  const f=addForm(main,f=>{
+    const value=f.querySelector("#sessionName").value.trim();
+    const a=get("sessions");if(!a.includes(value))a.push(value);save("sessions",a);sessionsPage();
+  });
+  addField(f,"নতুন সেশন (যেমন 2024-25)","sessionName");
+  addButton(f,"সেশন যোগ করুন",()=>f.requestSubmit());
+  showList(main,get("sessions"),x=>x,i=>{const a=get("sessions");a.splice(i,1);save("sessions",a);sessionsPage()});
+  addButton(main,"ফিরে যান",adminPage,"secondary");
+}
+function noticesPage(canEdit){
+  setPage("📢 নোটিশ বোর্ড");
+  if(canEdit){
+    const f=addForm(main,f=>{
+      const title=f.querySelector("#noticeTitle").value.trim();
+      const body=f.querySelector("#noticeBody").value.trim();
+      const a=get("notices");a.unshift({title,body,date:new Date().toLocaleDateString()});save("notices",a);noticesPage(true);
+    });
+    addField(f,"নোটিশের শিরোনাম","noticeTitle");
+    addArea(f,"বিস্তারিত","noticeBody");
+    addButton(f,"নোটিশ প্রকাশ করুন",()=>f.requestSubmit());
+  }
+  showList(main,get("notices"),x=>`${x.title} — ${x.body} (${x.date})`,
+    canEdit?i=>{const a=get("notices");a.splice(i,1);save("notices",a);noticesPage(true)}:null);
+  addButton(main,"হোমে ফিরুন",home,"secondary");
+}
+function reportPage(kind){
+  if(!loggedRole){loginPage("teacher");return}
+  const records=get("attendance");
+  setPage(kind==="live"?"📈 লাইভ রিপোর্ট":kind==="tracking"?"🔎 Tracking":"📊 হাজিরা রিপোর্ট",
+    "এই ব্রাউজারে সংরক্ষিত ডেমো রেকর্ড");
+  const date=new Date().toLocaleDateString("en-CA");
+  if(kind==="live")showList(main,records.filter(r=>r.date===date),r=>`${r.time} — ${r.name} (${r.roll}) — ${r.status}`);
+  else showList(main,records,r=>`${r.date} ${r.time} — ${r.name} (${r.roll}) — ${r.status}`);
+  addButton(main,"CSV রিপোর্ট ডাউনলোড",()=>{
+    const rows=[["তারিখ","সময়","নাম","রোল","অবস্থা"],...records.map(r=>[r.date,r.time,r.name,r.roll,r.status])];
+    const csv="\uFEFF"+rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
+    download("amc-report.csv",csv,"text/csv;charset=utf-8");
+  });
+  addButton(main,"ফিরে যান",()=>loggedRole==="admin"?adminPage():teacherPage(),"secondary");
+}
+function manualPage(){
+  if(!loggedRole){loginPage("teacher");return}
+  setPage("✍️ ম্যানুয়াল হাজিরা");
+  const f=addForm(main,f=>{
+    const roll=f.querySelector("#manualRoll").value.trim();
+    const s=get("students").find(x=>x.roll===roll);
+    if(!s){alert("এই রোলের শিক্ষার্থী পাওয়া যায়নি।");return}
+    const a=get("attendance");
+    a.push({roll:s.roll,name:s.name,session:s.session,date:new Date().toLocaleDateString("en-CA"),
+      time:new Date().toLocaleTimeString(),status:"উপস্থিত (ম্যানুয়াল)"});
+    save("attendance",a);alert("ডেমো হাজিরা যোগ হয়েছে।");reportPage("reports");
+  });
+  addField(f,"শিক্ষার্থীর রোল","manualRoll");
+  addButton(f,"হাজিরা যোগ করুন",()=>f.requestSubmit());
+}
+function marksPage(){
+  if(!loggedRole){loginPage("teacher");return}
+  setPage("🧮 নম্বর এন্ট্রি");
+  const f=addForm(main,f=>{
+    const a=get("marks");a.push({roll:f.querySelector("#markRoll").value.trim(),
+      subject:f.querySelector("#markSubject").value.trim(),mark:f.querySelector("#markValue").value});
+    save("marks",a);marksPage();
+  });
+  addField(f,"শিক্ষার্থীর রোল","markRoll");
+  addField(f,"বিষয়","markSubject");
+  addField(f,"প্রাপ্ত নম্বর","markValue","number");
+  addButton(f,"নম্বর সংরক্ষণ",()=>f.requestSubmit());
+  showList(main,get("marks"),x=>`রোল ${x.roll} — ${x.subject}: ${x.mark}`);
+  addButton(main,"ফিরে যান",teacherPage,"secondary");
+}
+function myAttendance(){
+  const s=currentStudent;setPage("📊 আমার হাজিরা",`${s.name} — রোল ${s.roll}`);
+  const a=get("attendance").filter(r=>r.roll===s.roll);
+  showList(main,a,r=>`${r.date} — ${r.status}`);
+  main.append(make("p",{},`মোট হাজিরা: ${a.length}`));
+  addButton(main,"ফিরে যান",studentPage,"secondary");
+}
+function myCourses(){
+  const s=currentStudent;setPage("📚 আমার কোর্স",`${s.name} — রোল ${s.roll}`);
+  const all=get("courses").filter(c=>!c.session||c.session===s.session);
+  showList(main,all,c=>`${c.course} — শিক্ষক: ${c.teacher}`);
+  addButton(main,"ফিরে যান",studentPage,"secondary");
+}
+function backupPage(){
+  if(!loggedRole){loginPage("admin");return}
+  setPage("💾 Backup","স্থানীয় তথ্য JSON ফাইলে সংরক্ষণ ও পুনরুদ্ধার");
+  addButton(main,"ব্যাকআপ ডাউনলোড",()=>{
+    const data={};["students","attendance","sessions","notices","courses","marks"].forEach(k=>data[k]=get(k));
+    download("amc-backup.json",JSON.stringify(data,null,2),"application/json");
+  });
+  const f=addForm(main,f=>{
+    const file=f.querySelector("#backupFile").files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{try{
+      const data=JSON.parse(reader.result);
+      ["students","attendance","sessions","notices","courses","marks"].forEach(k=>{if(Array.isArray(data[k]))save(k,data[k])});
+      alert("ব্যাকআপ পুনরুদ্ধার হয়েছে।");adminPage();
+    }catch{alert("সঠিক JSON ব্যাকআপ ফাইল নির্বাচন করুন।")}};
+    reader.readAsText(file);
+  });
+  addField(f,"ব্যাকআপ ফাইল নির্বাচন করুন","backupFile","file");
+  addButton(f,"ব্যাকআপ পুনরুদ্ধার",()=>f.requestSubmit());
+  addButton(main,"ফিরে যান",adminPage,"secondary");
+}
+function download(name,content,type){
+  const url=URL.createObjectURL(new Blob([content],{type}));
+  const a=make("a",{href:url,download:name});document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=> {
+  const p=b.dataset.page;
+  if(p==="home")home();
+  else if(p==="admin"||p==="teacher")loginPage(p);
+  else if(p==="student")studentLogin();
+  else if(p==="attendance")attendancePage();
+  else if(p==="notices")noticesPage(false);
+}));
+$("themeButton").addEventListener("click",()=>{
+  document.body.classList.toggle("dark");
+  $("themeButton").textContent=document.body.classList.contains("dark")?"☀️":"🌙";
+});
+$("attendanceForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  $("message").textContent="হাজিরা দিতে উপরের 'হাজিরা' মেনু খুলুন। PIN যাচাই ও সংরক্ষণ ওই পেজে হবে।";
+});
+home();
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(err=>console.log("Service worker:",err)));
+}
+</script>
 </body>
 </html>
