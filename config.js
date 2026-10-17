@@ -1,5 +1,5 @@
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
+
+window.AMC_FIREBASE_CONFIG = {
   apiKey: "AIzaSyDKHvAA6U9FJoOX1F2TYYkXx6Atazl5sxI",
   authDomain: "amc-attendence.firebaseapp.com",
   projectId: "amc-attendence",
