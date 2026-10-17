@@ -1,172 +1,93 @@
-
 <!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#5042e9">
+  <meta name="theme-color" content="#123c69">
   <meta name="description" content="AMC Economics Department Attendance Management System">
+
+  <title>AMC Economics Attendance</title>
+
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./icon-192.png">
   <link rel="stylesheet" href="./style.css">
-  <title>AMC Economics Attendance</title>
-
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      margin: 0;
-      background: linear-gradient(145deg, #5145e8, #902fe8, #e43da7);
-      color: #202938;
-      min-height: 100vh;
-    }
-
-    header {
-      padding: 15px;
-      color: white;
-      background: #ffffff20;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .brand { font-size: 19px; font-weight: 800; }
-
-    main {
-      width: min(950px, calc(100% - 24px));
-      margin: 25px auto;
-      padding: 22px;
-      box-sizing: border-box;
-      border-radius: 20px;
-      background: white;
-      min-height: 300px;
-      box-shadow: 0 12px 40px #0002;
-    }
-
-    .card {
-      max-width: 520px;
-      margin: 20px auto;
-      padding: 22px;
-      border-radius: 16px;
-      background: #f8f9ff;
-    }
-
-    input, select, textarea {
-      box-sizing: border-box;
-      width: 100%;
-      padding: 12px;
-      margin: 7px 0 14px;
-      border: 1px solid #aab5d0;
-      border-radius: 10px;
-      font: inherit;
-    }
-
-    label { display: block; font-weight: 600; }
-
-    button {
-      padding: 11px 15px;
-      border: 0;
-      border-radius: 10px;
-      background: #5042e9;
-      color: white;
-      font: inherit;
-      cursor: pointer;
-      margin: 4px;
-    }
-
-    button:disabled { opacity: .6; cursor: wait; }
-
-    .secondary { background: #596579; }
-    .hidden { display: none !important; }
-    .message { overflow-wrap: anywhere; margin: 12px 0; }
-    .small { color: #626b7c; font-size: 13px; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 12px;
-    }
-
-    .stat {
-      padding: 16px;
-      border: 1px solid #e0e5f0;
-      border-radius: 12px;
-      margin: 8px 0;
-    }
-
-    .stat b { display: block; font-size: 25px; margin-top: 6px; }
-    .menu { display: flex; flex-wrap: wrap; gap: 4px; }
-    .menu button { background: #ffffff30; }
-    .menu button.active { background: white; color: #5042e9; }
-    .table-wrap { width: 100%; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
-    th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-    th { background: #edf0ff; }
-    footer { text-align: center; color: white; padding: 16px; }
-
-    body.dark { background: #15182a; color: #f5f5ff; }
-    body.dark main, body.dark .card {
-      background: #252940;
-      color: #f5f5ff;
-    }
-    body.dark input, body.dark select, body.dark textarea {
-      background: #30364e;
-      color: white;
-    }
-    body.dark .small { color: #c0c6d9; }
-
-    @media (max-width: 500px) {
-      main { padding: 14px; }
-      .card { padding: 14px; }
-    }
-  </style>
 </head>
 
 <body>
-  <header>
-    <div class="topbar">
-      <div class="brand">🎓 AMC Economics<br>Attendance System</div>
-      <button id="themeBtn" type="button">🌙 থিম</button>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">AMC</div>
+      <div>
+        <h1>AMC Economics</h1>
+        <p>Attendance Management System</p>
+      </div>
     </div>
+
+    <button type="button" id="themeBtn" class="ghost">
+      🌙 থিম
+    </button>
   </header>
 
-  <main>
-    <div id="setupNotice" class="stat hidden" role="alert"></div>
+  <main class="wrap">
+    <div id="setupNotice" class="notice hidden"></div>
 
-    <section id="loginCard" class="card">
-      <h1>AMC Economics Attendance</h1>
-      <p>অনুমোদিত অ্যাকাউন্ট দিয়ে লগইন করুন।</p>
+    <section id="loginCard" class="panel auth">
+      <h2>লগইন করুন</h2>
+      <p class="muted">
+        অনুমোদিত অ্যাকাউন্ট দিয়ে প্রবেশ করুন।
+      </p>
 
       <form id="loginForm">
-        <label for="email">ইমেইল</label>
-        <input id="email" type="email" autocomplete="username" required>
+        <label for="email">
+          ইমেইল
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="username"
+            required
+          >
+        </label>
 
-        <label for="password">পাসওয়ার্ড</label>
-        <input id="password" type="password"
-               autocomplete="current-password" required>
+        <label for="password">
+          পাসওয়ার্ড
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          >
+        </label>
 
-        <button type="submit" id="loginBtn">লগইন</button>
+        <button type="submit" class="primary">
+          লগইন
+        </button>
+
+        <p id="loginMsg" class="message" role="status"></p>
       </form>
 
-      <div id="loginMsg" class="message" role="status" aria-live="polite"></div>
       <p class="small">
         অ্যাকাউন্ট না থাকলে অনুমোদিত অ্যাডমিনের সঙ্গে যোগাযোগ করুন।
       </p>
     </section>
 
     <section id="app" class="hidden">
-      <div class="stat">
-        <h2 id="welcomeTitle">স্বাগতম</h2>
-        <p id="userLine" class="small"></p>
-        <button id="logoutBtn" type="button" class="secondary">লগআউট</button>
+      <div class="panel welcome">
+        <div>
+          <h2 id="welcomeTitle">স্বাগতম</h2>
+          <p id="userLine" class="muted"></p>
+        </div>
+
+        <button type="button" id="logoutBtn" class="danger">
+          লগআউট
+        </button>
       </div>
 
-      <nav id="nav" class="menu" aria-label="ড্যাশবোর্ড মেনু"></nav>
-      <section id="view" aria-live="polite">
-        <p>তথ্য লোড হচ্ছে…</p>
+      <nav id="nav" class="nav" aria-label="প্রধান মেনু"></nav>
+
+      <section id="view" class="panel" aria-live="polite">
+        <p>লোড হচ্ছে…</p>
       </section>
     </section>
   </main>
@@ -176,13 +97,22 @@
     Attendance Management System
   </footer>
 
-  <!-- Firebase Compat SDK: app.js এই API ব্যবহার করে -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <!-- এই দুটি ফাইলের ক্রম পরিবর্তন করবে না --
   <script src="./config.js"></script>
   <script src="./app.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./sw.js")
+          .catch(function (error) {
+            console.error("Service Worker registration failed:", error);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
