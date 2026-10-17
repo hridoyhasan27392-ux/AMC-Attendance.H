@@ -184,21 +184,5 @@
   <!-- এই দুটি ফাইলের ক্রম পরিবর্তন করবে না -->
   <script src="./config.js"></script>
   <script src="./app.js"></script>
-
-  <script>
-    const themeBtn = document.getElementById("themeBtn");
-
-    if (localStorage.getItem("amc-theme") === "dark") {
-      document.body.classList.add("dark");
-      themeBtn.textContent = "☀️ থিম";
-    }
-
-    themeBtn.addEventListener("click", () => {
-      document.body.classList.toggle("dark");
-      const dark = document.body.classList.contains("dark");
-      localStorage.setItem("amc-theme", dark ? "dark" : "light");
-      themeBtn.textContent = dark ? "☀️ থিম" : "🌙 থিম";
-    });
-  </script>
 </body>
 </html>
