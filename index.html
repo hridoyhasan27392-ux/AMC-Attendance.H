@@ -1,118 +1,785 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#123c69">
-  <meta name="description" content="AMC Economics Department Attendance Management System">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a">
+<title>Economics AMC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#1e3a8a;--primary-d:#0f1f55;--primary-l:#e8edfa;
+  --gold:#c99a2e;--gold-l:#faf0d9;--gold-t:#7a5a10;
+  --red:#b3261e;--red-l:#fbe9e7;
+  --bg:#f2f4fa;--card:#fff;--text:#141a33;--muted:#5b6485;--line:#e1e6f2;--soft:#f2f4fa;
+  --radius:20px;--shadow:0 2px 10px rgba(15,31,85,.10);
+}
+[data-theme="dark"]{
+  --primary:#4f74d9;--primary-d:#0a1230;--primary-l:#1a2a55;
+  --gold-l:#3a3015;--gold-t:#e6c36a;--red-l:#3b1f1c;--red:#ff8a80;
+  --bg:#0b1020;--card:#131a30;--text:#e8ecf8;--muted:#9aa6c7;--line:#25304f;--soft:#1a2340;
+  --shadow:0 2px 10px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;padding-bottom:84px;min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+a{color:var(--primary)}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
 
-  <title>AMC Economics Attendance</title>
+/* header */
+header.top{position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);border-top:4px solid var(--primary)}
+header.top .wrap{display:flex;align-items:center;gap:12px;padding-top:10px;padding-bottom:10px}
+.logo{width:48px;height:48px;flex:none}
+.brand{flex:1;min-width:0}
+.brand b{display:block;font-size:20px;color:var(--primary);font-weight:700;line-height:1.2;font-family:'Inter','Noto Sans Bengali',sans-serif}
+.brand small{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbtn{border:1.5px solid var(--line);border-radius:16px;padding:10px 16px;font-weight:600;color:var(--primary);background:var(--card)}
+.hbtn.icon{padding:10px;width:44px;height:44px;display:grid;place-items:center}
+.ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./icon-192.png">
-  <link rel="stylesheet" href="./style.css">
+/* hero */
+.hero{background:linear-gradient(135deg,var(--primary-d),var(--primary));color:#fff;padding:28px 0 70px}
+.hero .eyebrow{font-size:14px;opacity:.85}
+.hero h1{font-size:40px;line-height:1.25;margin:6px 0 10px;font-weight:700}
+.hero p{font-size:16px;opacity:.9}
+.hero.lite{padding-bottom:64px}
+.hero.lite h1{font-size:34px}
+.datepill{display:inline-block;margin-top:16px;background:rgba(255,255,255,.16);padding:9px 18px;border-radius:30px;font-weight:600;font-size:14.5px}
+.cta{display:flex;align-items:center;gap:14px;background:var(--card);color:var(--text);border-radius:var(--radius);padding:16px;margin-top:22px;box-shadow:var(--shadow);width:100%;text-align:left}
+.cta .ib{width:52px;height:52px;border-radius:14px;background:var(--primary-l);color:var(--primary);display:grid;place-items:center;flex:none}
+.cta b{display:block;font-size:19px;color:var(--primary)}
+.cta span{font-size:13.5px;color:var(--muted)}
+.cta .go{margin-left:auto;width:46px;height:46px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;flex:none}
+.cta .ib .ic,.cta .go .ic{width:24px;height:24px}
+.linkc{display:block;text-align:center;color:#fff;font-weight:600;margin-top:14px;text-decoration:none}
+
+/* cards */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;border:1px solid var(--line)}
+.pull{margin-top:-46px;position:relative}
+.stack>*+*{margin-top:16px}
+.row-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.row-h h2{font-size:22px}
+.pill{background:var(--gold-l);color:var(--gold-t);font-weight:600;font-size:13px;padding:5px 12px;border-radius:20px;white-space:nowrap}
+.more{color:var(--primary);font-weight:700;text-decoration:none;font-size:15px}
+
+/* chips */
+.chips{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px;scrollbar-width:thin}
+.chip{flex:none;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:30px;border:1.5px solid var(--line);background:var(--card);font-weight:600;font-size:15px}
+.chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.cnt{background:var(--soft);color:var(--text);border-radius:12px;padding:0 8px;font-size:13px;min-width:24px;text-align:center}
+.chip.on .cnt{background:rgba(255,255,255,.25);color:#fff}
+.chip.day{padding:8px 14px;font-size:14px}
+
+/* class rows */
+.crow{display:flex;gap:14px;padding:14px 4px;border-top:1px solid var(--line)}
+.crow .tm{width:112px;flex:none}
+.crow .tm b{display:block;color:var(--primary);font-size:15px}
+.crow .tm small{color:var(--muted);font-size:12.5px;display:block}
+.crow .ds b{display:block;font-size:17px;font-family:'Inter','Noto Sans Bengali',sans-serif}
+.crow .ds small{color:var(--muted);font-size:14px;font-family:'Inter','Noto Sans Bengali',sans-serif}
+.crow.past{opacity:.5}
+.crow.now{background:var(--primary-l);border-radius:14px;border-top-color:transparent}
+.badge-now{display:inline-block;background:var(--primary);color:#fff;font-size:11.5px;padding:1px 9px;border-radius:12px;margin-left:8px;vertical-align:middle;font-family:'Noto Sans Bengali',sans-serif}
+.empty{text-align:center;color:var(--muted);padding:26px 0}
+
+/* notices */
+.nitem{display:flex;gap:14px;padding:16px 0;border-top:1px solid var(--line);width:100%;text-align:left}
+.nitem:first-of-type{border-top:0}
+.dbox{width:62px;height:62px;border-radius:16px;background:var(--primary-l);color:var(--primary);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;line-height:1.2}
+.dbox b{font-size:24px}.dbox span{font-size:13px;font-weight:600}
+.nitem h3{font-size:17px;line-height:1.45}
+.meta{display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap}
+.tag{background:var(--soft);border-radius:14px;padding:2px 12px;font-size:13px;font-weight:600;color:var(--muted)}
+.search{width:100%;padding:13px 16px;border:1.5px solid var(--line);border-radius:14px;background:var(--soft);margin-bottom:12px}
+.search:focus,.field:focus{outline:2px solid var(--primary);outline-offset:1px}
+.demo{background:var(--gold-l);color:var(--gold-t);border-radius:14px;padding:10px 14px;font-size:13.5px;margin-bottom:14px}
+
+/* attendance */
+.seg{display:flex;background:var(--soft);border-radius:18px;padding:5px;margin-bottom:20px;border:1px solid var(--line)}
+.seg button{flex:1;padding:12px;border-radius:14px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--primary);box-shadow:var(--shadow)}
+.steps{display:flex;gap:8px;justify-content:center;margin-bottom:20px;flex-wrap:wrap}
+.st{display:flex;align-items:center;gap:8px;background:var(--soft);border-radius:30px;padding:5px 14px 5px 5px;font-weight:600;font-size:14px;color:var(--muted)}
+.st i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-size:13px}
+.st.on{background:var(--primary-l);color:var(--text)}.st.on i{background:var(--primary);color:#fff}
+.st.ok i{background:var(--primary);color:#fff}
+.card h3.q{font-size:26px;margin-bottom:4px}
+.muted{color:var(--muted)}
+.pinbox{display:flex;gap:12px;justify-content:center;margin:24px 0}
+.pinbox input{width:64px;height:76px;border-radius:18px;border:2px solid var(--line);background:var(--soft);text-align:center;font-size:30px;font-weight:700}
+.pinbox input:focus{border-color:var(--primary);outline:4px solid var(--primary-l);background:var(--card)}
+.btn{display:block;width:100%;padding:16px;border-radius:16px;background:var(--primary);color:#fff;font-weight:700;font-size:18px;text-align:center;text-decoration:none}
+.btn:disabled{background:#9aa9d6;cursor:not-allowed}
+.btn.ghost{background:var(--primary-l);color:var(--primary);margin-top:10px}
+.btn.sm{display:inline-block;width:auto;padding:10px 18px;font-size:15px}
+.field{width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:14px;background:var(--soft);margin:6px 0 14px}
+label.lb{font-weight:600;font-size:14.5px}
+.err{background:var(--red-l);color:var(--red);padding:10px 14px;border-radius:12px;font-weight:600;margin:12px 0;font-size:14.5px}
+.info{background:var(--primary-l);padding:10px 14px;border-radius:12px;margin-bottom:16px;font-size:14.5px}
+.note{text-align:center;font-size:14px;color:var(--muted);margin-top:14px}
+.success{text-align:center;padding:10px 0}
+.success .big{width:84px;height:84px;border-radius:50%;background:var(--primary-l);color:var(--primary);display:grid;place-items:center;margin:0 auto 14px}
+.success .big .ic{width:46px;height:46px;stroke-width:2.4}
+.tiny{font-size:13px;color:var(--muted);text-align:center;margin-top:12px}
+
+/* my attendance */
+.who{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin:4px 0 14px}
+.who h3{font-size:22px}
+.ringcard{display:flex;align-items:center;gap:22px;border-radius:22px;padding:22px;background:var(--gold-l)}
+.ringcard.good{background:var(--primary-l)}.ringcard.bad{background:var(--red-l)}
+.ring{width:128px;height:128px;position:relative;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:26px}
+.ringcard .rt b{font-size:30px}.ringcard .rt small{font-size:17px;color:var(--muted)}
+.ringcard .rt div{font-weight:700;margin-top:4px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.tile{border-radius:18px;text-align:center;padding:16px 6px;font-weight:600}
+.tile b{display:block;font-size:30px;line-height:1.2}
+.tile.p{background:var(--primary-l);color:var(--primary)}.tile.l{background:var(--gold-l);color:var(--gold-t)}.tile.a{background:var(--red-l);color:var(--red)}
+.sub{font-size:20px;margin:22px 0 8px}
+.crs{padding:12px 0;border-top:1px solid var(--line)}
+.crs .top2{display:flex;justify-content:space-between;font-weight:600;gap:10px}
+.bar{height:9px;border-radius:6px;background:var(--soft);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--primary);border-radius:6px}
+.bar i.warn{background:var(--gold)}.bar i.low{background:var(--red)}
+.hrow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.hrow b{display:block;font-size:17px}.hrow small{color:var(--muted)}
+.st-chip{padding:5px 16px;border-radius:20px;font-weight:700;font-size:14px}
+.st-chip.p{background:var(--primary-l);color:var(--primary)}.st-chip.l{background:var(--gold-l);color:var(--gold-t)}.st-chip.a{background:var(--red-l);color:var(--red)}
+
+/* footer, nav */
+footer.foot{background:var(--primary-d);color:#fff;margin-top:34px;padding:30px 0}
+footer.foot b.t{font-size:24px;font-family:'Inter',sans-serif}
+footer.foot p{opacity:.85;margin-top:10px}
+footer.foot p.s{opacity:.65;font-size:14.5px}
+footer.foot a{color:#fff;font-weight:700;text-decoration:none;display:inline-block;margin-top:14px}
+.panel-link{text-align:center;margin-top:18px;color:var(--muted)}
+.panel-link a{font-weight:700}
+nav.bar-nav{position:fixed;bottom:0;left:0;right:0;z-index:40;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav.bar-nav .wrap{display:grid;grid-template-columns:repeat(4,1fr);padding:0}
+nav.bar-nav a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 0 8px;color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:600}
+nav.bar-nav a.on{color:var(--primary)}
+nav.bar-nav .ic{width:28px;height:28px}
+
+/* modal + toast */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.modal .sheet{background:var(--card);width:100%;max-width:720px;border-radius:24px 24px 0 0;padding:24px 20px 28px;max-height:85vh;overflow:auto}
+.modal h3{font-size:21px;line-height:1.45;margin-bottom:8px}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#0f1f55;color:#fff;padding:12px 20px;border-radius:14px;z-index:70;font-weight:600;max-width:90%;text-align:center}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+
+/* links, faculty */
+.lk{display:flex;align-items:center;gap:14px;padding:14px 4px;border-top:1px solid var(--line);text-decoration:none;color:var(--text)}
+.lk:first-of-type{border-top:0}
+.lk .ib2{width:46px;height:46px;border-radius:14px;background:var(--primary-l);color:var(--primary);display:grid;place-items:center;flex:none}
+.lk b{display:block;font-size:17px;color:var(--primary)}
+.lk span{font-size:13.5px;color:var(--muted);word-break:break-all}
+.lk .ar{margin-left:auto;color:var(--muted);font-weight:700}
+.fcard{display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid var(--line)}
+.fcard:first-of-type{border-top:0}
+.av{width:56px;height:56px;border-radius:50%;background:var(--primary-l);color:var(--primary);display:grid;place-items:center;font-weight:700;font-size:19px;flex:none;overflow:hidden;font-family:'Inter',sans-serif}
+.av img{width:100%;height:100%;object-fit:cover}
+.fcard h3{font-size:17px;line-height:1.35;font-family:'Inter','Noto Sans Bengali',sans-serif}
+.fcard small{color:var(--muted);font-size:14px}
+.hd{display:inline-block;background:var(--gold-l);color:var(--gold-t);font-size:12px;font-weight:700;padding:1px 10px;border-radius:12px;margin-left:6px;vertical-align:middle;font-family:'Noto Sans Bengali',sans-serif}
+.fl{margin-left:auto;font-weight:700;font-size:14px;text-decoration:none;white-space:nowrap}
+.livebar{background:var(--primary-l);color:var(--primary);border-radius:14px;padding:9px 14px;font-size:13.5px;margin-bottom:14px;font-weight:600}
+
+
+.tcard{display:flex;gap:16px;align-items:center;padding:16px 0;border-top:1px solid var(--line)}
+.tcard:first-of-type{border-top:0}
+.tcard.feat{border:1.5px solid var(--primary-l);background:linear-gradient(135deg,var(--primary-l),transparent);border-radius:18px;padding:16px}
+.tcard .av{width:84px;height:84px;font-size:26px;border:3px solid var(--card);box-shadow:0 2px 8px rgba(15,31,85,.18)}
+.tinfo{min-width:0;flex:1}
+.tinfo h3{font-size:18px;line-height:1.3;font-family:'Inter','Noto Sans Bengali',sans-serif}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}
+.tags .hd{margin-left:0}
+.hd.b{background:var(--primary-l);color:var(--primary)}
+.callbtn{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:14px;padding:7px 14px;font-weight:700;color:var(--primary);text-decoration:none;background:var(--card)}
+.callbtn .ic{width:18px;height:18px}
+.tinfo .fl{display:block;margin:6px 0 0;font-size:13px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);text-align:center;padding:18px 8px}
+.stat b{display:block;font-size:32px;color:var(--primary);line-height:1.25}
+.stat.g b{color:var(--gold)}
+.stat span{color:var(--muted);font-size:14.5px}
+.yb{padding:14px 0;border-top:1px solid var(--line)}
+.yb:first-of-type{border-top:0}
+.yb .top2{display:flex;justify-content:space-between;font-weight:700;font-size:17px}
+.sbar{display:flex;height:22px;border-radius:12px;overflow:hidden;margin:10px 0 8px}
+.sbar i{background:var(--primary)}.sbar u{background:var(--gold);text-decoration:none}
+.yb .lg2{display:flex;justify-content:space-between;color:var(--muted);font-size:14.5px}
+.qcard{display:block;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;text-decoration:none;color:var(--text);box-shadow:var(--shadow)}
+.qcard b{display:block;font-size:20px;color:var(--primary)}
+.qcard span{color:var(--muted);font-size:15px}
+.hist{line-height:1.8;font-size:16px}
+
+@media (min-width:760px){
+  .hero h1{font-size:48px}
+  body{padding-bottom:90px}
+}
+@media print{
+  header.top,nav.bar-nav,footer.foot,.hero,.no-print,.chips{display:none!important}
+  body{background:#fff;color:#000;padding:0}
+  .pull{margin-top:0}.card{box-shadow:none;border:0}
+  .print-title{display:block!important}
+}
+.print-title{display:none;font-size:22px;font-weight:700;margin-bottom:12px}
+</style>
 </head>
-
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">AMC</div>
-      <div>
-        <h1>AMC Economics</h1>
-        <p>Attendance Management System</p>
-      </div>
-    </div>
+<header class="top">
+  <div class="wrap">
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M32 3 56 11v20c0 15-10 26-24 30C18 57 8 46 8 31V11z" fill="#1e3a8a"/>
+      <path d="M32 8 51 14v17c0 12-8 21-19 25C21 52 13 43 13 31V14z" fill="#fff"/>
+      <circle cx="32" cy="29" r="9" fill="none" stroke="#b3261e" stroke-width="3"/>
+      <circle cx="32" cy="29" r="3" fill="#b3261e"/>
+      <path d="M20 44h24" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <div class="brand"><b>Economica AMC</b><small id="appSub"></small></div>
+    <button class="hbtn icon" id="themeBtn" data-act="theme" aria-label="Theme"></button>
+    <button class="hbtn" id="langBtn" data-act="lang"></button>
+  </div>
+</header>
 
-    <button type="button" id="themeBtn" class="ghost">
-      🌙 থিম
-    </button>
-  </header>
+<main id="app"></main>
 
-  <main class="wrap">
-    <div id="setupNotice" class="notice hidden"></div>
+<nav class="bar-nav" id="nav"></nav>
+<div id="overlay"></div>
 
-    <section id="loginCard" class="panel auth">
-      <h2>লগইন করুন</h2>
-      <p class="muted">
-        অনুমোদিত অ্যাকাউন্ট দিয়ে প্রবেশ করুন।
-      </p>
+<script>
+(function(){
+'use strict';
 
-      <form id="loginForm">
-        <label for="email">
-          ইমেইল
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autocomplete="username"
-            required
-          >
-        </label>
+/* ================= CONFIG & DEMO DATA =================
+   DEMO = true  -> নমুনা তথ্য ও ডেমো PIN চালু।
+   Phase 2-3: নোটিশ/রুটিন স্বয়ংক্রিয় সংগ্রহ থেকে আসবে।
+   Phase 4-6: PIN যাচাই ও হাজিরা Firebase + server function দিয়ে হবে। */
+const DEMO = true;
+const COLLEGE_NOTICE_URL = 'https://www.anandamohangovtcollege.edu.bd/home/notice';
+const COLLEGE_URL = 'https://www.anandamohangovtcollege.edu.bd/';
+// সংযুক্ত দুটি ওয়েবসাইট
+const LINKS = {
+  college: 'https://www.anandamohangovtcollege.edu.bd/home/department?department=MTU=',
+  attendance: 'https://amc-economics.vercel.app/'
+};
+/* স্বয়ংক্রিয় আপডেট: Vercel-এ স্ক্র্যাপার ফাংশন বসালে এখানে তার URL দিন।
+   উদাহরণ: 'https://your-project.vercel.app/api/college'
+   ফাংশনটি এই আকারে JSON দেবে:
+   { updatedAt:'2026-11-01T10:00:00Z',
+     notices:[{id,d:'YYYY-MM-DD',t:'শিরোনাম',img:0,url:'...'}],
+     teachers:[{n:'নাম',d:'Designation',head:false,phone:'',email:'',photo:'',url:''}],
+     routine:[ [ {d,s,e,course,teacher,room} ... ] ×৫ গ্রুপ (১ম,২য়,৩য়,৪র্থ,মাস্টার্স) ] } */
+const LIVE_API = '';
 
-        <label for="password">
-          পাসওয়ার্ড
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autocomplete="current-password"
-            required
-          >
-        </label>
+const GROUPS = [
+  { key:'y1', session:'2025-26', courses:[['Basic Macroeconomics','Sanjida Begum'],['Basic Statistics','Md. Moshiul Alam'],['Principles of Microeconomics','Md. Ahsan Habib'],['Bangladesh Economy','Md. Momen Hossain']], room:'201', per:2 },
+  { key:'y2', session:'2024-25', courses:[['Intermediate Microeconomics','Qudrat Hayat'],['Intermediate Macroeconomics','Mohammad Shajahan Karim'],['Mathematical Economics','Md. Nazmul Hoda'],['Economic History','Md. Arif Billah']], room:'202', per:2 },
+  { key:'y3', session:'2023-24', courses:[['Public Finance','Muhammad Khizir Al Islam'],['International Economics','Mustafizur Rahman'],['Development Economics','Saiful Islam'],['Econometrics I','Mohammad Nurul Amin']], room:'301', per:3 },
+  { key:'y4', session:'2022-23', courses:[['Advanced Econometrics','Md. Ahsan Habib'],['Monetary Economics','Qudrat Hayat'],['Labour Economics','Md. Nazmul Hoda'],['Research Methodology','Md. Arif Billah']], room:'302', per:3 },
+  { key:'ms', session:'2021-22', courses:[['Advanced Microeconomics','Mustafizur Rahman'],['Advanced Macroeconomics','Mohammad Nurul Amin'],['Economic Growth','Md. Ahsan Habib'],['Thesis Seminar','Md. Momen Hossain']], room:'401', per:2 }
+];
+const SLOTS = [['09:00','09:45'],['09:45','10:30'],['10:30','11:15'],['11:15','12:00']];
+// রুটিন (নমুনা): দিন ০=রবি … ৪=বৃহস্পতি
+let CLASSES = GROUPS.map(g=>{
+  const list=[];
+  for(let d=0; d<=4; d++) for(let s=0; s<g.per; s++){
+    const c=g.courses[(d+s)%g.courses.length];
+    list.push({d, s:SLOTS[s][0], e:SLOTS[s][1], course:c[0], teacher:c[1], room:g.room});
+  }
+  return list;
+});
+const DEMO_PINS = { '1234':{g:0,course:0}, '2345':{g:1,course:0}, '3456':{g:2,course:0}, '4567':{g:3,course:0}, '5678':{g:4,course:0} };
 
-        <button type="submit" class="primary">
-          লগইন
-        </button>
+let NOTICES = [
+  {id:1,d:'2026-10-27',t:'অর্থনীতি বিভাগের ২০২৪-২০২৫ শিক্ষাবর্ষের মাস্টার্স শেষ পর্বের প্রাথমিক আবেদন সংক্রান্ত বিজ্ঞপ্তি',img:1},
+  {id:2,d:'2026-10-12',t:'অর্থনীতি বিভাগের বিতর্ক ক্লাব ও সাংস্কৃতিক ক্লাব সংক্রান্ত বিজ্ঞপ্তি',img:2},
+  {id:3,d:'2026-10-12',t:'প্রিলিমিনারি টু মাস্টার্স ও মাস্টার্স শেষ পর্বের ২য় ইন-কোর্স পরীক্ষা সংক্রান্ত বিজ্ঞপ্তি',img:0},
+  {id:4,d:'2026-10-11',t:'২০২৪-২০২৫ শিক্ষাবর্ষের অনার্স ২য় বর্ষের ক্লাস শুরু সংক্রান্ত বিজ্ঞপ্তি',img:0},
+  {id:5,d:'2026-10-07',t:'অনার্স ৩য় বর্ষ ২০২৫ সালের চূড়ান্ত পরীক্ষার রুটিন',img:0},
+  {id:6,d:'2026-10-07',t:'প্রতিবন্ধী ও মেধাবী দরিদ্র শিক্ষার্থীদের বিশেষ অনুদান সংক্রান্ত বিজ্ঞপ্তি (সমাজকল্যাণ মন্ত্রণালয়)',img:0},
+  {id:7,d:'2026-10-04',t:'আইসিটি ব্যবহারিক পরীক্ষা সংক্রান্ত বিজ্ঞপ্তি',img:0},
+  {id:8,d:'2026-10-01',t:'বিতর্ক ক্লাবের অনুষ্ঠানে শিক্ষক ও শিক্ষার্থীদের অংশগ্রহণ সংক্রান্ত বিজ্ঞপ্তি',img:0},
+  {id:9,d:'2026-09-15',t:'অনার্স ৩য় বর্ষ ২০২৫ অর্থনীতি পরীক্ষার ফরম পূরণ সংক্রান্ত বিজ্ঞপ্তি',img:0},
+  {id:10,d:'2025-05-25',t:'ক্লাসে উপস্থিতি ও ইন-কোর্স পরীক্ষা বিষয়ে জাতীয় বিশ্ববিদ্যালয়ের নির্দেশনা',img:0}
+]; // কলেজের পেজ থেকে নেওয়া স্ন্যাপশট (শিরোনাম বাংলায় সংক্ষেপিত)। লাইভ API চালু হলে এটা বদলে যাবে।
 
-        <p id="loginMsg" class="message" role="status"></p>
-      </form>
+let FACULTY = [
+  {n:'Md. Momen Hossain',d:'Professor',head:true,bcs:18,phone:'01712514459',id:182},
+  {n:'Md Ahsan Habib',d:'Professor',bcs:22,phone:'01718732878',id:183},
+  {n:'Qudrat Hayat',d:'Associate Professor',bcs:26,phone:'01726559500',id:184},
+  {n:'Mohammad Shajahan Karim',d:'Associate Professor',bcs:26,phone:'01718028011',id:185},
+  {n:'Md. Moshiul Alam',d:'Associate Professor',bcs:24,phone:'01716010050',id:258},
+  {n:'Md. Nazmul Hoda',d:'Assistant Professor',bcs:33,phone:'01716630864',id:241},
+  {n:'Md. Arif Billah',d:'Assistant Professor',bcs:35,phone:'01719809072',id:244},
+  {n:'Sanjida Begum',d:'Assistant Professor',bcs:33,phone:'01739950242',id:245},
+  {n:'Muhammad Khizir Al Islam',d:'Assistant Professor',bcs:33,phone:'01728767179',id:255},
+  {n:'Mustafizur Rahman',d:'Assistant Professor',bcs:30,phone:'01716017841',id:268},
+  {n:'Saiful Islam',d:'Lecturer',bcs:36,phone:'01728542044',id:246},
+  {n:'Mohammad Nurul Amin',d:'Lecturer',bcs:37,phone:'01734508732',id:274}
+].map(x=>Object.assign({url:'https://www.anandamohangovtcollege.edu.bd/home/teacher/profile/'+x.id+'?departmentMTU='},x));
+// তথ্যসূত্র: কলেজের অফিসিয়াল ওয়েবসাইটে প্রকাশিত শিক্ষক প্রোফাইল। ছবি লাইভ API থেকে আসবে (photo ফিল্ড)।
+let STATS = {total:1264,male:616,female:648,books:5994,years:[
+  {t:249,m:115,f:134},{t:192,m:85,f:107},{t:182,m:87,f:95},{t:178,m:90,f:88},{t:67,m:37,f:30},{t:396,m:202,f:194}
+]}; // কলেজের অর্থনীতি বিভাগ পেজ থেকে (বইয়ের সংখ্যা আপনার স্ক্রিনশট থেকে)
+const DESIG_BN = {'Professor':'অধ্যাপক','Associate Professor':'সহযোগী অধ্যাপক','Assistant Professor':'সহকারী অধ্যাপক','Lecturer':'প্রভাষক'};
 
-      <p class="small">
-        অ্যাকাউন্ট না থাকলে অনুমোদিত অ্যাডমিনের সঙ্গে যোগাযোগ করুন।
-      </p>
-    </section>
+/* ================= I18N ================= */
+const L = {
+ bn:{
+  appSub:'অর্থনীতি বিভাগ · আনন্দ মোহন কলেজ', home:'হোম', routine:'রুটিন', notices:'নোটিশ', attendance:'হাজিরা',
+  est:'আনন্দ মোহন কলেজ · ময়মনসিংহ · স্থাপিত ১৯০৮', dept:'অর্থনীতি বিভাগ',
+  lead:'ক্লাস রুটিন, নোটিশ ও হাজিরা এক জায়গায়।',
+  giveAtt:'হাজিরা দিন', giveAttSub:'শিক্ষকের দেওয়া ৪-ডিজিটের PIN দিয়ে', seeMine:'নিজের হাজিরা দেখুন',
+  today:'আজকের ক্লাস', totalCls:n=>`মোট ${n}টি ক্লাস`, noClass:'এই দিনে কোনো ক্লাস নেই', now:'চলছে', until:'পর্যন্ত',
+  latest:'সর্বশেষ নোটিশ', all:'সব নোটিশ', imgs:n=>`${n}টি ছবি`,
+  routineT:'ক্লাস রুটিন', routineS:'বর্ষ ও দিন বেছে নিয়ে ক্লাসের সময়সূচি দেখুন।',
+  days:['রবি','সোম','মঙ্গল','বুধ','বৃহস্পতি'], print:'প্রিন্ট / PDF', official:'কলেজের অফিসিয়াল ওয়েবসাইট',
+  noticesT:'নোটিশ', noticesS:'বিভাগ ও কলেজের সর্বশেষ বিজ্ঞপ্তি।', search:'নোটিশ খুঁজুন…', allYears:'সব বছর', noResult:'কোনো নোটিশ পাওয়া যায়নি',
+  viewOfficial:'অফিসিয়াল সাইটে দেখুন', close:'বন্ধ করুন',
+  tabGive:'হাজিরা দিন', tabMine:'আমার হাজিরা',
+  giveS:'শিক্ষকের দেওয়া ৪-ডিজিটের PIN দিয়ে ক্লাসে হাজিরা নিশ্চিত করুন।', mineS:'সেশন ও রোল দিয়ে নিজের উপস্থিতির হার, কোর্স অনুযায়ী হিসাব ও হাজিরার ইতিহাস দেখুন।',
+  s1:'PIN', s2:'রোল', s3:'নিশ্চিত', enterPin:'PIN দিন', enterPinS:'শিক্ষকের দেওয়া ৪-ডিজিটের PIN লিখুন', next:'এগিয়ে যান',
+  multi:'একই মোবাইল থেকে একাধিক ছাত্র হাজিরা দিতে পারবে', wrongPin:'PIN সঠিক নয়। আবার চেষ্টা করুন।',
+  demoPin:'ডেমো PIN: ১২৩৪ (১ম বর্ষ), ২৩৪৫ (২য় বর্ষ), ৩৪৫৬ (৩য় বর্ষ)',
+  yourRoll:'তোমার রোল', session:'সেশন', roll:'রোল নম্বর', confirm:'হাজিরা নিশ্চিত করুন', classInfo:'ক্লাস', back:'পিছনে',
+  badRoll:'সঠিক রোল নম্বর দিন (১–৩০০)।', wrongGroup:'এই PIN এই সেশনের ক্লাসের জন্য নয়।', dup:'এই ক্লাসে আজ ইতিমধ্যে হাজিরা দেওয়া হয়েছে।',
+  doneT:'হাজিরা সম্পন্ন!', doneS:(r,c)=>`রোল ${r} · ${c}`, another:'আরেকজনের হাজিরা', finish:'শেষ করুন',
+  view:'দেখুন', present:'উপস্থিত', late:'দেরি', absent:'অনুপস্থিত', byCourse:'কোর্স অনুযায়ী', history:'হাজিরার ইতিহাস',
+  yr:['১ম বর্ষ','২য় বর্ষ','৩য় বর্ষ','৪র্থ বর্ষ','প্রিলিমিনারি ও মাস্টার্স'],
+  classes:n=>`${n} ক্লাস`, warn:'একটু সতর্ক হোন', ok:'ভালো আছে', great:'চমৎকার', otherRoll:'অন্য রোল', enterMine:'সেশন ও রোল দিয়ে "দেখুন" চাপুন।',
+  footA:'আনন্দ মোহন কলেজ, ময়মনসিংহের অর্থনীতি বিভাগের শিক্ষার্থীদের জন্য। রুটিন ও নোটিশ কলেজের অফিশিয়াল ওয়েবসাইট থেকে স্বয়ংক্রিয়ভাবে আনার ব্যবস্থা থাকবে।',
+  footB:'শিক্ষার্থীদের তৈরি একটি অনানুষ্ঠানিক প্রজেক্ট, কলেজের অফিশিয়াল ওয়েবসাইট নয়।',
+  teacherQ:'শিক্ষক বা অ্যাডমিন?', panel:'প্যানেলে যান',
+  demoNote:'নমুনা তথ্য। পরের ধাপে কলেজের ওয়েবসাইট থেকে স্বয়ংক্রিয়ভাবে আসবে।',
+  panelT:'শিক্ষক / অ্যাডমিন প্যানেল', panelS:'নিরাপদ লগইন করে ব্যবস্থাপনা করুন।', email:'ইমেইল', pass:'পাসওয়ার্ড', login:'লগইন',
+  panelSoon:'Firebase লগইন পরের ধাপে (Phase 4) যুক্ত হবে।', printTitle:'অর্থনীতি বিভাগ · ক্লাস রুটিন',
+  months:['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'],
+  mshort:['জানু','ফেব্রু','মার্চ','এপ্রি','মে','জুন','জুলাই','আগস্ট','সেপ্টে','অক্টো','নভে','ডিসে'],
+  wd:['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'], dark:'ডার্ক মোড', langBtn:'English',
+  faculty:'শিক্ষক', facultyT:'শিক্ষকবৃন্দ', facultyS:n=>`বিভাগের ${n} জন শিক্ষক। ফোন নম্বরে ট্যাপ করলে সরাসরি কল করা যাবে।`, searchT:'নাম বা পদবি খুঁজুন…', head:'বিভাগীয় প্রধান', noTeacher:'কোনো শিক্ষক পাওয়া যায়নি',
+  links:'গুরুত্বপূর্ণ লিংক', lkCollege:'কলেজের অর্থনীতি বিভাগ', lkCollegeS:'অফিসিয়াল নোটিশ, শিক্ষক ও রুটিন', lkAtt:'হাজিরা সাইট', lkAttS:'amc-economics.vercel.app',
+  seeAll:'সব দেখুন', profile:'প্রোফাইল', updated:'সর্বশেষ আপডেট', liveOn:'কলেজের সাইট থেকে স্বয়ংক্রিয়ভাবে আপডেট হচ্ছে', teachersN:n=>`${n} জন`,
+  desig:DESIG_BN,
+  aboutT:'বিভাগ সম্পর্কে', aboutS:'অর্থনীতি বিভাগের ইতিহাস, ছাত্র-ছাত্রীর সংখ্যা ও সেমিনার লাইব্রেরি।',
+  qAbout:'বিভাগ সম্পর্কে', qAboutS:'ইতিহাস ও পরিসংখ্যান', qFac:'শিক্ষক তালিকা', qFacS:'আমাদের শিক্ষকবৃন্দ ও ফোন নম্বর', qDig:'ডিজিটাল কনটেন্ট', qDigS:'কলেজের সাইটে খুলবে',
+  history:'বিভাগের ইতিহাস', historyTxt:'১৯০৮ সালে কলেজ প্রতিষ্ঠার সময় থেকেই উচ্চ মাধ্যমিক স্তরে অর্থনীতি পড়ানো হয়। ১৯১৪ সালে কলকাতা বিশ্ববিদ্যালয় কলেজকে প্রথম শ্রেণির মর্যাদা দিলে বিএ কোর্সে অর্থনীতি যুক্ত হয়। ১৯৭২-৭৩ শিক্ষাবর্ষে অনার্স এবং ১৯৮৬-৮৭ শিক্ষাবর্ষে মাস্টার্স কোর্স চালু হয়।',
+  totalStu:'মোট শিক্ষার্থী', male:'ছাত্র', female:'ছাত্রী', books:'সেমিনার লাইব্রেরির বই', byYear:'বর্ষ অনুযায়ী শিক্ষার্থী', persons:n=>`${n} জন`, bcsT:n=>`${n}তম বিসিএস`, source:'তথ্যসূত্র: কলেজের অফিসিয়াল ওয়েবসাইট',
+  yrS:['১ম বর্ষ','২য় বর্ষ','৩য় বর্ষ','৪র্থ বর্ষ','মাস্টার্স ১ম পর্ব','মাস্টার্স শেষ পর্ব']
+ },
+ en:{
+  appSub:'Dept. of Economics · Ananda Mohan College', home:'Home', routine:'Routine', notices:'Notices', attendance:'Attendance',
+  est:'Ananda Mohan College · Mymensingh · Est. 1908', dept:'Department of Economics',
+  lead:'Class routine, notices and attendance in one place.',
+  giveAtt:'Give Attendance', giveAttSub:'Using the 4-digit PIN from your teacher', seeMine:'View my attendance',
+  today:"Today's Classes", totalCls:n=>`${n} classes total`, noClass:'No classes on this day', now:'Ongoing', until:'until',
+  latest:'Latest Notices', all:'All notices', imgs:n=>`${n} image${n>1?'s':''}`,
+  routineT:'Class Routine', routineS:'Pick a year and day to see the schedule.',
+  days:['Sun','Mon','Tue','Wed','Thu'], print:'Print / PDF', official:'College official website',
+  noticesT:'Notices', noticesS:'Latest notices from the department and college.', search:'Search notices…', allYears:'All years', noResult:'No notices found',
+  viewOfficial:'View on official site', close:'Close',
+  tabGive:'Give Attendance', tabMine:'My Attendance',
+  giveS:"Confirm your attendance with the 4-digit PIN given by your teacher.", mineS:'Enter your session and roll to see attendance rate, course-wise summary and history.',
+  s1:'PIN', s2:'Roll', s3:'Done', enterPin:'Enter PIN', enterPinS:'Type the 4-digit PIN from your teacher', next:'Continue',
+  multi:'Multiple students can give attendance from one phone', wrongPin:'Incorrect PIN. Please try again.',
+  demoPin:'Demo PINs: 1234 (1st yr), 2345 (2nd yr), 3456 (3rd yr)',
+  yourRoll:'Your roll', session:'Session', roll:'Roll number', confirm:'Confirm Attendance', classInfo:'Class', back:'Back',
+  badRoll:'Enter a valid roll number (1–300).', wrongGroup:'This PIN is not for this session’s class.', dup:'Attendance already given for this class today.',
+  doneT:'Attendance recorded!', doneS:(r,c)=>`Roll ${r} · ${c}`, another:'Another student', finish:'Finish',
+  view:'View', present:'Present', late:'Late', absent:'Absent', byCourse:'By course', history:'Attendance history',
+  yr:['1st Year','2nd Year','3rd Year','4th Year','Prelim & Masters'],
+  classes:n=>`${n} classes`, warn:'Be careful', ok:'Doing well', great:'Excellent', otherRoll:'Other roll', enterMine:'Choose session and roll, then tap “View”.',
+  footA:'For students of the Economics Department, Ananda Mohan College, Mymensingh. Routine and notices will be fetched automatically from the college’s official website.',
+  footB:'An unofficial student project, not the college’s official website.',
+  teacherQ:'Teacher or admin?', panel:'Go to panel',
+  demoNote:'Sample data. It will come automatically from the college website in a later phase.',
+  panelT:'Teacher / Admin Panel', panelS:'Sign in securely to manage the portal.', email:'Email', pass:'Password', login:'Sign in',
+  panelSoon:'Firebase sign-in will be added in the next phase (Phase 4).', printTitle:'Dept. of Economics · Class Routine',
+  months:['January','February','March','April','May','June','July','August','September','October','November','December'],
+  mshort:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+  wd:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'], dark:'Dark mode', langBtn:'বাংলা',
+  faculty:'Faculty', facultyT:'Faculty Members', facultyS:n=>`${n} teachers of the department. Tap a phone number to call directly.`, searchT:'Search name or designation…', head:'Head of Dept.', noTeacher:'No teachers found',
+  links:'Important Links', lkCollege:'College Economics Dept.', lkCollegeS:'Official notices, faculty and routine', lkAtt:'Attendance site', lkAttS:'amc-economics.vercel.app',
+  seeAll:'See all', profile:'Profile', updated:'Last updated', liveOn:'Updating automatically from the college website', teachersN:n=>`${n} members`,
+  desig:{},
+  aboutT:'About the Department', aboutS:'History, student numbers and the seminar library of the Department of Economics.',
+  qAbout:'About the Department', qAboutS:'History and statistics', qFac:'Faculty List', qFacS:'Our teachers and phone numbers', qDig:'Digital Content', qDigS:'Opens on the college site',
+  history:'Department history', historyTxt:'Economics has been taught at the higher secondary level since the college was founded in 1908. After the University of Calcutta granted the college first-grade status in 1914, economics was added to the BA programme. The honours course began in 1972–73 and the master’s course in 1986–87.',
+  totalStu:'Total students', male:'Male', female:'Female', books:'Seminar library books', byYear:'Students by year', persons:n=>`${n} member${n==1?'':'s'}`, bcsT:n=>`${n} BCS`, source:'Source: college official website',
+  yrS:['1st Year','2nd Year','3rd Year','4th Year','Masters 1st Part','Masters Final Part']
+ }
+};
 
-    <section id="app" class="hidden">
-      <div class="panel welcome">
-        <div>
-          <h2 id="welcomeTitle">স্বাগতম</h2>
-          <p id="userLine" class="muted"></p>
-        </div>
+/* ================= STATE & HELPERS ================= */
+const mem = {};
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return mem[k]!==undefined?mem[k]:d; } },
+  set(k,v){ mem[k]=v; try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+const S = {
+  lang: store.get('amc_lang','bn'), theme: store.get('amc_theme','light'),
+  hYear:0, rYear:0, rDay:null, nQuery:'', nYear:'all', fQuery:'', live:false, updatedAt:null,
+  attTab:'give', step:1, pinInfo:null, err:'', session:'2024-25', roll:'', done:null,
+  mySession: store.get('amc_mysession','2024-25'), myRoll: store.get('amc_myroll',''), mine:null
+};
+const T = (k,...a)=>{ const v=L[S.lang][k]; return typeof v==='function'?v(...a):v; };
+const bnD='০১২৩৪৫৬৭৮৯';
+const n = x => String(x).replace(/\d/g,d=> S.lang==='bn'?bnD[d]:d);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toMin = t => { const [h,m]=t.split(':').map(Number); return h*60+m; };
+function ft(t){
+  const [h,m]=t.split(':').map(Number); const hh=String(h%12||12).padStart(2,'0')+':'+String(m).padStart(2,'0');
+  if(S.lang==='en') return hh+(h<12?' AM':' PM');
+  return (h<12?'সকাল':h<16?'দুপুর':'বিকাল')+' '+n(hh);
+}
+function fdate(d){ const L2=L[S.lang]; return S.lang==='bn' ? `${L2.wd[d.getDay()]}, ${n(d.getDate())} ${L2.months[d.getMonth()]}, ${n(d.getFullYear())}` : `${L2.wd[d.getDay()]}, ${d.getDate()} ${L2.months[d.getMonth()]} ${d.getFullYear()}`; }
+function fshort(d){ return `${n(d.getDate())} ${L[S.lang].mshort[d.getMonth()]}`; }
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const parse = s => { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); };
+const groupOfSession = s => GROUPS.findIndex(g=>g.session===s);
+const classesFor = (gi,day) => CLASSES[gi].filter(c=>c.d===day).sort((a,b)=>toMin(a.s)-toMin(b.s));
 
-        <button type="button" id="logoutBtn" class="danger">
-          লগআউট
-        </button>
-      </div>
+const ICON = {
+ home:'<svg class="ic" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>',
+ cal:'<svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>',
+ bell:'<svg class="ic" viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 1 1 12 0v6l2 2H4z"/><path d="M10 21h4"/></svg>',
+ check:'<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>',
+ arrow:'<svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+ phone:'<svg class="ic" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>',
+ moon:'<svg class="ic" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>',
+ sun:'<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>'
+};
+const EXT = ' ↗';
 
-      <nav id="nav" class="nav" aria-label="প্রধান মেনু"></nav>
+/* ================= ATTENDANCE DATA ================= */
+function hash(a,b){ let x=Math.imul(a|0,73856093)^Math.imul(b|0,19349663); x=Math.imul(x^(x>>>13),1274126177); return ((x^(x>>>16))>>>0)%100; }
+function baseRecords(session, roll){
+  const gi=groupOfSession(session); if(gi<0) return [];
+  const out=[]; const today=new Date(); today.setHours(0,0,0,0);
+  for(let i=1;i<=35;i++){
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    const wd=d.getDay(); if(wd>4) continue;
+    classesFor(gi,wd).slice(0,1).forEach(c=>{
+      const r=hash(Number(roll)*31+gi, i);
+      out.push({date:iso(d), course:c.course, status: r<72?'p':r<80?'l':'a'});
+    });
+  }
+  return out;
+}
+const localRecs = () => store.get('amc_att',[]);
+function getRecords(session, roll){
+  const mine=localRecs().filter(r=>r.session===session && String(r.roll)===String(roll)).map(r=>({date:r.date,course:r.course,status:r.status}));
+  return baseRecords(session,roll).concat(mine).sort((a,b)=>b.date.localeCompare(a.date));
+}
 
-      <section id="view" class="panel" aria-live="polite">
-        <p>লোড হচ্ছে…</p>
-      </section>
-    </section>
-  </main>
+/* ================= VIEWS ================= */
+function hero(title, sub, lite){
+  return `<section class="hero ${lite?'lite':''}"><div class="wrap"><div class="eyebrow">${T('dept')}</div><h1>${title}</h1><p>${sub}</p></div></section>`;
+}
+function footer(){
+  return `<footer class="foot"><div class="wrap"><b class="t">Economica AMC</b><p>${T('footA')}</p><p class="s">${T('footB')}</p><a href="${LINKS.college}" target="_blank" rel="noopener">${T('lkCollege')}${EXT}</a><br><a href="${LINKS.attendance}" target="_blank" rel="noopener">${T('lkAtt')}${EXT}</a></div></footer>`;
+}
+function classRow(c, isToday){
+  let cls='';
+  if(isToday){ const now=new Date(); const m=now.getHours()*60+now.getMinutes(); cls = m>=toMin(c.e)?'past': m>=toMin(c.s)?'now':''; }
+  return `<div class="crow ${cls}"><div class="tm"><b>${ft(c.s)}</b><small>${T('until')} ${ft(c.e)}</small></div><div class="ds"><b>${esc(c.course)}${cls==='now'?`<span class="badge-now">${T('now')}</span>`:''}</b><small>${esc(c.teacher)} · ${S.lang==='bn'?'কক্ষ':'Room'} ${n(c.room)}</small></div></div>`;
+}
+function noticeItem(x){
+  const d=parse(x.d);
+  return `<button class="nitem" data-act="notice" data-id="${x.id}"><div class="dbox"><b>${n(d.getDate())}</b><span>${L[S.lang].mshort[d.getMonth()]}</span></div><div><h3>${esc(x.t)}</h3><div class="meta">${x.img?`<span class="tag">${T('imgs',n(x.img))}</span>`:''}<span class="muted">${n(d.getFullYear())}</span></div></div></button>`;
+}
 
-  <footer>
-    AMC Economics Department<br>
-    Attendance Management System
-  </footer>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+function initials(nm){ const w=nm.split(/\s+/).filter(x=>!/^(Professor|Md|Md\.|Mohammad|Muhammad)$/i.test(x)); return ((w[0]||'')[0]||'')+((w[1]||'')[0]||''); }
+function desig(d){ return (S.lang==='bn'&&DESIG_BN[d])||d; }
+function isHead(x){ return x.head || /head/i.test(x.d||''); }
+function avatar(x){ return `<div class="av">${x.photo?`<img src="${esc(x.photo)}" alt="" loading="lazy" onerror="this.remove()">`:esc(initials(x.n).toUpperCase())}</div>`; }
+const ordEn=k=>k+((k%100>=11&&k%100<=13)?'th':({1:'st',2:'nd',3:'rd'}[k%10]||'th'));
+const bcsTxt=k=>S.lang==='bn'?T('bcsT',n(k)):T('bcsT',ordEn(k));
+const phoneShow=p=>{ const d=String(p).replace(/\D/g,''); return d.length===11?d.slice(0,5)+'-'+d.slice(5):d; };
+function teacherCard(x,feat){
+  const link=x.url||LINKS.college;
+  return `<div class="tcard ${feat?'feat':''}">${avatar(x)}<div class="tinfo"><h3>${esc(x.n)}</h3>
+    <div class="tags">${isHead(x)?`<span class="hd">${T('head')}</span>`:`<span class="hd b">${esc(desig(x.d))}</span>`}${x.bcs?`<span class="tag">${bcsTxt(x.bcs)}</span>`:''}</div>
+    ${x.phone?`<a class="callbtn" href="tel:${esc(x.phone)}">${ICON.phone}<span>${n(phoneShow(x.phone))}</span></a>`:''}
+    ${x.email?`<div><small><a href="mailto:${esc(x.email)}">${esc(x.email)}</a></small></div>`:''}
+    <a class="fl" href="${esc(link)}" target="_blank" rel="noopener">${T('profile')}${EXT}</a></div></div>`;
+}
+function linksCard(){
+  const row=(href,ic,b,sp)=>`<a class="lk" href="${href}" target="_blank" rel="noopener"><div class="ib2">${ic}</div><div style="min-width:0"><b>${b}</b><span>${sp}</span></div><div class="ar">↗</div></a>`;
+  return `<div class="card"><div class="row-h"><h2>${T('links')}</h2></div>${row(LINKS.college,ICON.bell,T('lkCollege'),T('lkCollegeS'))}${row(LINKS.attendance,ICON.check,T('lkAtt'),T('lkAttS'))}</div>`;
+}
+function quickCards(){
+  return `<a class="qcard" href="#/about"><b>${T('qAbout')}</b><span>${T('qAboutS')}</span></a>
+  <a class="qcard" href="#/faculty"><b>${T('qFac')}</b><span>${T('qFacS')}</span></a>
+  <a class="qcard" href="${COLLEGE_URL}" target="_blank" rel="noopener"><b>${T('qDig')}</b><span>${T('qDigS')}${EXT}</span></a>`;
+}
+function liveBar(){ return S.live?`<div class="livebar">${T('liveOn')}${S.updatedAt?` · ${T('updated')}: ${n(new Date(S.updatedAt).toLocaleString(S.lang==='bn'?'bn-BD':'en-GB'))}`:''}</div>`:''; }
+function facultyView(){
+  const q=S.fQuery.trim().toLowerCase();
+  const list=FACULTY.filter(x=>!q||x.n.toLowerCase().includes(q)||(x.d||'').toLowerCase().includes(q)||(DESIG_BN[x.d]||'').includes(q)||String(x.phone||'').includes(q));
+  const head=list.filter(isHead), rest=list.filter(x=>!isHead(x));
+  const order=['Professor','Associate Professor','Assistant Professor','Lecturer'];
+  const keys=order.concat([...new Set(rest.map(x=>x.d))].filter(d=>!order.includes(d)));
+  const groups=keys.map(k=>({k,items:rest.filter(x=>x.d===k)})).filter(g=>g.items.length);
+  const headCard=head.length?`<div class="card"><div class="row-h"><h2>${T('head')}</h2></div>${head.map(x=>teacherCard(x,true)).join('')}</div>`:'';
+  const gcards=groups.map(g=>`<div class="card"><div class="row-h"><h2>${esc(desig(g.k))}</h2><span class="pill">${T('persons',n(g.items.length))}</span></div>${g.items.map(x=>teacherCard(x)).join('')}</div>`).join('');
+  return `${hero(T('facultyT'),T('facultyS',n(FACULTY.length)),true)}<div class="wrap stack pull">
+    <div class="card"><input class="search" style="margin-bottom:0" id="fsearch" type="search" placeholder="${T('searchT')}" value="${esc(S.fQuery)}">${liveBar()?`<div style="margin-top:12px">${liveBar()}</div>`:''}</div>
+    ${list.length?headCard+gcards:`<div class="card"><div class="empty">${T('noTeacher')}</div></div>`}${linksCard()}</div>${footer()}`;
+}
+const fmtN=x=>n(String(x).replace(/\B(?=(\d{3})+(?!\d))/g,','));
+function aboutView(){
+  const st=STATS, yrs=T('yrS');
+  const bars=st.years.map((y,i)=>{ const pm=y.m+y.f?Math.round(y.m/(y.m+y.f)*100):50;
+    return `<div class="yb"><div class="top2"><span>${yrs[i]||''}</span><span>${T('persons',fmtN(y.t))}</span></div><div class="sbar"><i style="width:${pm}%"></i><u style="width:${100-pm}%"></u></div><div class="lg2"><span>${fmtN(y.m)} ${T('male')}</span><span>${fmtN(y.f)} ${T('female')}</span></div></div>`; }).join('');
+  return `${hero(T('aboutT'),T('aboutS'),true)}<div class="wrap stack pull">
+   <div class="card"><div class="row-h"><h2>${T('history')}</h2></div><p class="hist">${T('historyTxt')}</p><p class="muted" style="font-size:13.5px;margin-top:10px">${T('source')}</p></div>
+   <div class="stats"><div class="stat"><b>${fmtN(st.total)}</b><span>${T('totalStu')}</span></div><div class="stat"><b>${fmtN(st.male)}</b><span>${T('male')}</span></div>
+   <div class="stat g"><b>${fmtN(st.female)}</b><span>${T('female')}</span></div><div class="stat"><b>${fmtN(st.books)}</b><span>${T('books')}</span></div></div>
+   <div class="card"><div class="row-h"><h2>${T('byYear')}</h2></div>${bars}</div>${linksCard()}</div>${footer()}`;
+}
+function homeView(){
+  const now=new Date(), day=now.getDay();
+  const counts = GROUPS.map((g,i)=>classesFor(i,day).length);
+  const total = counts.reduce((a,b)=>a+b,0);
+  const tabs = GROUPS.map((g,i)=>`<button class="chip ${i===S.hYear?'on':''}" data-act="hyear" data-i="${i}">${T('yr')[i]} <span class="cnt">${n(counts[i])}</span></button>`).join('');
+  const list = classesFor(S.hYear,day);
+  const rows = list.length ? list.map(c=>classRow(c,true)).join('') : `<div class="empty">${T('noClass')}</div>`;
+  return `${`<section class="hero"><div class="wrap"><div class="eyebrow">${T('est')}</div><h1>${T('dept')}</h1><p>${T('lead')}</p><span class="datepill">${fdate(now)}</span>
+    <button class="cta" data-act="goatt">${''}<div class="ib">${ICON.check}</div><div><b>${T('giveAtt')}</b><span>${T('giveAttSub')}</span></div><div class="go">${ICON.arrow}</div></button>
+    <a class="linkc" href="#/attendance" data-act="gomine">${T('seeMine')} →</a></div></section>`}
+  <div class="wrap stack" style="margin-top:-34px;position:relative">
+    <div class="card"><div class="row-h"><h2>${T('today')}</h2><span class="pill">${T('totalCls',n(total))}</span></div><div class="chips">${tabs}</div>${rows}${!S.live?`<div class="demo" style="margin-top:12px">${T('demoNote')}</div>`:''}</div>
+    <div class="card"><div class="row-h"><h2>${T('latest')}</h2><a class="more" href="#/notices">${T('all')}</a></div>${NOTICES.slice(0,3).map(noticeItem).join('')}</div>
+    ${quickCards()}${linksCard()}
+  </div>${footer()}`;
+}
 
-  <script src="./config.js"></script>
-  <script src="./app.js"></script>
+function routineView(){
+  const today=new Date().getDay();
+  if(S.rDay===null) S.rDay = today<=4?today:0;
+  const tabs = GROUPS.map((g,i)=>`<button class="chip ${i===S.rYear?'on':''}" data-act="ryear" data-i="${i}">${T('yr')[i]}</button>`).join('');
+  const days = T('days').map((d,i)=>`<button class="chip day ${i===S.rDay?'on':''}" data-act="rday" data-i="${i}">${d}</button>`).join('');
+  const list = classesFor(S.rYear,S.rDay);
+  const rows = list.length ? list.map(c=>classRow(c, S.rDay===today)).join('') : `<div class="empty">${T('noClass')}</div>`;
+  return `${hero(T('routineT'),T('routineS'),true)}<div class="wrap stack pull"><div class="card">
+    <div class="print-title">${T('printTitle')} — ${T('yr')[S.rYear]}</div>
+    <div class="chips no-print">${tabs}</div><div class="chips no-print">${days}</div>${rows}
+    ${!S.live?`<div class="demo" style="margin-top:12px">${T('demoNote')}</div>`:''}
+    <div class="actions no-print"><button class="btn sm" data-act="print">${T('print')}</button><a class="btn sm ghost" style="margin-top:0" href="${COLLEGE_URL}" target="_blank" rel="noopener">${T('official')}${EXT}</a></div>
+  </div></div>${footer()}`;
+}
 
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", function () {
-        navigator.serviceWorker.register("./sw.js")
-          .catch(function (error) {
-            console.error("Service Worker registration failed:", error);
-          });
-      });
-    }
-  </script>
+function noticesView(){
+  const years=[...new Set(NOTICES.map(x=>x.d.slice(0,4)))].sort().reverse();
+  const q=S.nQuery.trim().toLowerCase();
+  const list=NOTICES.filter(x=>(S.nYear==='all'||x.d.startsWith(S.nYear)) && (!q||x.t.toLowerCase().includes(q)));
+  const chips=[`<button class="chip day ${S.nYear==='all'?'on':''}" data-act="nyear" data-v="all">${T('allYears')}</button>`].concat(years.map(y=>`<button class="chip day ${S.nYear===y?'on':''}" data-act="nyear" data-v="${y}">${n(y)}</button>`)).join('');
+  return `${hero(T('noticesT'),T('noticesS'),true)}<div class="wrap stack pull"><div class="card">
+    <input class="search" id="nsearch" type="search" placeholder="${T('search')}" value="${esc(S.nQuery)}"><div class="chips">${chips}</div>
+    ${liveBar()}${!S.live?`<div class="demo">${T('demoNote')}</div>`:''}
+    <div id="nlist">${list.length?list.map(noticeItem).join(''):`<div class="empty">${T('noResult')}</div>`}</div>
+  </div></div>${footer()}`;
+}
+
+function sessionOptions(sel){
+  return GROUPS.map(g=>`<option value="${g.session}" ${g.session===sel?'selected':''}>${g.session} (${T('yr')[GROUPS.indexOf(g)]})</option>`).join('');
+}
+function stepper(){
+  const names=[T('s1'),T('s2'),T('s3')];
+  return `<div class="steps">${names.map((nm,i)=>`<div class="st ${S.step===i+1?'on':''} ${S.step>i+1?'ok':''}"><i>${n(i+1)}</i>${nm}</div>`).join('')}</div>`;
+}
+function giveView(){
+  const err = S.err?`<div class="err">${S.err}</div>`:'';
+  if(S.step===1) return `${stepper()}<h3 class="q">${T('enterPin')}</h3><p class="muted">${T('enterPinS')}</p>
+    <div class="pinbox" id="pinbox">${[0,1,2,3].map(i=>`<input inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" data-i="${i}" aria-label="PIN ${i+1}">`).join('')}</div>${err}
+    <button class="btn" id="pinBtn" data-act="pinnext" disabled>${T('next')}</button>
+    <p class="note">${T('multi')}</p>${!S.live?`<div class="demo" style="margin-top:14px">${T('demoPin')}</div>`:''}`;
+  if(S.step===2){
+    const g=GROUPS[S.pinInfo.g], c=g.courses[S.pinInfo.course];
+    return `${stepper()}<h3 class="q">${T('yourRoll')}</h3>
+      <div class="info"><b>${T('classInfo')}:</b> ${esc(c[0])} · ${esc(c[1])}</div>
+      <label class="lb" for="sess">${T('session')}</label><select class="field" id="sess">${sessionOptions(S.session)}</select>
+      <label class="lb" for="roll">${T('roll')}</label><input class="field" id="roll" type="number" inputmode="numeric" min="1" max="300" value="${esc(S.roll)}" placeholder="${S.lang==='bn'?'যেমন: ২৬৩':'e.g. 263'}">${err}
+      <button class="btn" data-act="confirm">${T('confirm')}</button><button class="btn ghost" data-act="backpin">${T('back')}</button>`;
+  }
+  return `${stepper()}<div class="success"><div class="big">${ICON.check}</div><h3 class="q">${T('doneT')}</h3><p class="muted">${T('doneS',n(S.done.roll),esc(S.done.course))}</p></div>
+    <button class="btn" data-act="another">${T('another')}</button><button class="btn ghost" data-act="finish">${T('finish')}</button>`;
+}
+function mineView(){
+  const form = `<div class="no-print"><label class="lb" for="msess">${T('session')}</label><select class="field" id="msess">${sessionOptions(S.mySession)}</select>
+    <label class="lb" for="mroll">${T('roll')}</label><input class="field" id="mroll" type="number" inputmode="numeric" min="1" max="300" value="${esc(S.myRoll)}" placeholder="${S.lang==='bn'?'যেমন: ২৬৩':'e.g. 263'}">
+    ${S.err?`<div class="err">${S.err}</div>`:''}<button class="btn" data-act="showmine">${T('view')}</button></div>`;
+  if(!S.mine) return `${form}<p class="note">${T('enterMine')}</p>`;
+  const {session,roll}=S.mine, gi=groupOfSession(session), recs=getRecords(session,roll);
+  const p=recs.filter(r=>r.status==='p').length, l=recs.filter(r=>r.status==='l').length, a=recs.filter(r=>r.status==='a').length, tot=recs.length;
+  const pct = tot? Math.round((p+l)/tot*1000)/10 : 0;
+  const cls = pct>=90?'good':pct>=75?'good':pct>=60?'':'bad';
+  const msg = pct>=90?T('great'):pct>=75?T('ok'):T('warn');
+  const C=2*Math.PI*52, col = pct>=75?'var(--primary)':pct>=60?'var(--gold)':'var(--red)';
+  const byC={}; recs.forEach(r=>{ (byC[r.course]=byC[r.course]||{t:0,pr:0}).t++; if(r.status!=='a') byC[r.course].pr++; });
+  const crs=Object.keys(byC).map(k=>{ const v=byC[k], pc=Math.round(v.pr/v.t*100); return `<div class="crs"><div class="top2"><span>${esc(k)}</span><span>${n(pc)}%</span></div><div class="bar"><i class="${pc>=75?'':pc>=60?'warn':'low'}" style="width:${pc}%"></i></div></div>`; }).join('');
+  const lab={p:T('present'),l:T('late'),a:T('absent')};
+  const hist=recs.slice(0,15).map(r=>`<div class="hrow"><div><b>${esc(r.course)}</b><small>${fshort(parse(r.date))}, ${n(r.date.slice(0,4))}</small></div><span class="st-chip ${r.status}">${lab[r.status]}</span></div>`).join('');
+  return `${form}<div class="who" style="margin-top:22px"><div><h3>${S.lang==='bn'?'রোল':'Roll'} ${n(roll)}</h3><span class="muted">${T('yr')[gi]} · ${T('session')} ${n(session)}</span></div></div>
+   <div class="ringcard ${cls}"><div class="ring"><svg width="128" height="128" viewBox="0 0 128 128"><circle cx="64" cy="64" r="52" fill="none" stroke="rgba(120,120,100,.2)" stroke-width="12"/><circle cx="64" cy="64" r="52" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct/100)}"/></svg><b>${n(pct)}%</b></div>
+   <div class="rt"><b>${n(p+l)}</b> <small>/ ${T('classes',n(tot))}</small><div style="color:${col}">${msg}</div></div></div>
+   <div class="tiles"><div class="tile p"><b>${n(p)}</b>${T('present')}</div><div class="tile l"><b>${n(l)}</b>${T('late')}</div><div class="tile a"><b>${n(a)}</b>${T('absent')}</div></div>
+   <h3 class="sub">${T('byCourse')}</h3>${crs}<h3 class="sub">${T('history')}</h3>${hist}${DEMO?`<div class="demo" style="margin-top:14px">${T('demoNote')}</div>`:''}`;
+}
+function attendanceView(){
+  const give=S.attTab==='give';
+  return `${hero(give?T('giveAtt'):T('tabMine'), give?T('giveS'):T('mineS'),true)}<div class="wrap stack pull"><div class="card">
+    <div class="seg no-print"><button class="${give?'on':''}" data-act="atab" data-v="give">${T('tabGive')}</button><button class="${!give?'on':''}" data-act="atab" data-v="mine">${T('tabMine')}</button></div>
+    ${give?giveView():mineView()}</div>
+    <p class="panel-link">${T('teacherQ')} <a href="#/panel">${T('panel')} ↗</a></p></div>${footer()}`;
+}
+function panelView(){
+  return `${hero(T('panelT'),T('panelS'),true)}<div class="wrap stack pull"><div class="card">
+   <form id="panelForm"><label class="lb" for="pe">${T('email')}</label><input class="field" id="pe" type="email" autocomplete="username" required>
+   <label class="lb" for="pp">${T('pass')}</label><input class="field" id="pp" type="password" autocomplete="current-password" required>
+   <button class="btn" type="submit">${T('login')}</button></form></div></div>${footer()}`;
+}
+
+/* ================= RENDER ================= */
+const VIEWS={home:homeView,routine:routineView,notices:noticesView,attendance:attendanceView,panel:panelView,faculty:facultyView,about:aboutView};
+let lastRoute=null;
+function route(){ const r=(location.hash||'#/home').replace('#/',''); return VIEWS[r]?r:'home'; }
+function render(){
+  const r=route(), app=document.getElementById('app');
+  app.innerHTML=VIEWS[r]();
+  if(r!==lastRoute){ window.scrollTo(0,0); lastRoute=r; }
+  document.documentElement.lang=S.lang;
+  document.documentElement.setAttribute('data-theme',S.theme);
+  document.getElementById('appSub').textContent=T('appSub');
+  document.getElementById('langBtn').textContent=T('langBtn');
+  document.getElementById('themeBtn').innerHTML = S.theme==='dark'?ICON.sun:ICON.moon;
+  document.getElementById('themeBtn').setAttribute('aria-label',T('dark'));
+  const active = r==='panel'?'attendance':(r==='faculty'||r==='about')?'home':r;
+  document.getElementById('nav').innerHTML = `<div class="wrap">${[['home','home'],['routine','cal'],['notices','bell'],['attendance','check']].map(([k,ic])=>`<a href="#/${k}" class="${active===k?'on':''}">${ICON[ic]}<span>${T(k)}</span></a>`).join('')}</div>`;
+  if(r==='attendance' && S.attTab==='give' && S.step===1){ const f=document.querySelector('#pinbox input'); if(f && !('ontouchstart' in window)) f.focus(); }
+}
+
+function toast(msg){
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
+}
+function openModal(html){
+  const o=document.getElementById('overlay');
+  o.innerHTML=`<div class="modal" data-act="closemodal"><div class="sheet">${html}</div></div>`;
+}
+function closeModal(){ document.getElementById('overlay').innerHTML=''; }
+
+/* ================= EVENTS ================= */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]'); if(!el) return;
+  const act=el.dataset.act;
+  if(act==='closemodal'){ if(e.target===el||e.target.closest('[data-close]')) closeModal(); return; }
+  switch(act){
+    case 'lang': S.lang=S.lang==='bn'?'en':'bn'; store.set('amc_lang',S.lang); render(); break;
+    case 'theme': S.theme=S.theme==='dark'?'light':'dark'; store.set('amc_theme',S.theme); render(); break;
+    case 'hyear': S.hYear=+el.dataset.i; render(); break;
+    case 'ryear': S.rYear=+el.dataset.i; render(); break;
+    case 'rday': S.rDay=+el.dataset.i; render(); break;
+    case 'nyear': S.nYear=el.dataset.v; render(); break;
+    case 'print': window.print(); break;
+    case 'notice': {
+      const x=NOTICES.find(v=>v.id===+el.dataset.id); if(!x) break;
+      openModal(`<h3>${esc(x.t)}</h3><div class="meta"><span class="tag">${fdate(parse(x.d))}</span>${x.img?`<span class="tag">${T('imgs',n(x.img))}</span>`:''}</div>
+        ${DEMO?`<div class="demo" style="margin-top:14px">${T('demoNote')}</div>`:''}
+        <div class="actions"><a class="btn sm" href="${COLLEGE_NOTICE_URL}" target="_blank" rel="noopener">${T('viewOfficial')}${EXT}</a><button class="btn sm ghost" style="margin-top:0" data-close="1">${T('close')}</button></div>`);
+      break; }
+    case 'goatt': S.attTab='give'; S.step=1; S.err=''; location.hash='#/attendance'; if(route()==='attendance') render(); break;
+    case 'gomine': S.attTab='mine'; S.err=''; break; // href শেষে hashchange রেন্ডার করবে
+    case 'atab': S.attTab=el.dataset.v; S.err=''; render(); break;
+    case 'pinnext': {
+      const pin=[...document.querySelectorAll('#pinbox input')].map(i=>i.value).join('');
+      const info=DEMO_PINS[pin];
+      if(!info){ S.err=T('wrongPin'); render(); break; }
+      S.pinInfo=info; S.session=GROUPS[info.g].session; S.err=''; S.step=2; render(); break; }
+    case 'backpin': S.step=1; S.err=''; render(); break;
+    case 'confirm': {
+      S.session=document.getElementById('sess').value; S.roll=document.getElementById('roll').value.trim();
+      const r=parseInt(S.roll,10);
+      if(!(r>=1&&r<=300)){ S.err=T('badRoll'); render(); break; }
+      if(groupOfSession(S.session)!==S.pinInfo.g){ S.err=T('wrongGroup'); render(); break; }
+      const course=GROUPS[S.pinInfo.g].courses[S.pinInfo.course][0], date=iso(new Date());
+      const recs=localRecs();
+      if(recs.some(x=>x.session===S.session&&+x.roll===r&&x.date===date&&x.course===course)){ S.err=T('dup'); render(); break; }
+      recs.push({session:S.session,roll:r,date,course,status:'p'}); store.set('amc_att',recs);
+      S.done={roll:r,course}; S.err=''; S.step=3; render(); break; }
+    case 'another': S.step=2; S.roll=''; S.err=''; render(); break;
+    case 'finish': S.step=1; S.pinInfo=null; S.roll=''; S.err=''; location.hash='#/home'; break;
+    case 'showmine': {
+      S.mySession=document.getElementById('msess').value; S.myRoll=document.getElementById('mroll').value.trim();
+      const r=parseInt(S.myRoll,10);
+      if(!(r>=1&&r<=300)){ S.err=T('badRoll'); S.mine=null; render(); break; }
+      store.set('amc_mysession',S.mySession); store.set('amc_myroll',S.myRoll);
+      S.mine={session:S.mySession,roll:r}; S.err=''; render(); break; }
+  }
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='nsearch'){
+    S.nQuery=t.value; const pos=t.selectionStart; render();
+    const ni=document.getElementById('nsearch'); ni.focus(); ni.setSelectionRange(pos,pos); return;
+  }
+  if(t.id==='fsearch'){
+    S.fQuery=t.value; const pos=t.selectionStart; render();
+    const fi=document.getElementById('fsearch'); fi.focus(); fi.setSelectionRange(pos,pos); return;
+  }
+  if(t.closest&&t.closest('#pinbox')){
+    const boxes=[...document.querySelectorAll('#pinbox input')]; const i=+t.dataset.i;
+    const digits=t.value.replace(/\D/g,'');
+    if(digits.length>1){ digits.slice(0,4-i).split('').forEach((d,k)=>{ if(boxes[i+k]) boxes[i+k].value=d; }); (boxes[Math.min(i+digits.length,3)]).focus(); }
+    else { t.value=digits; if(digits && boxes[i+1]) boxes[i+1].focus(); }
+    const full=boxes.every(b=>b.value);
+    document.getElementById('pinBtn').disabled=!full;
+  }
+});
+document.addEventListener('keydown',e=>{
+  const t=e.target; if(!(t.closest&&t.closest('#pinbox'))) return;
+  const boxes=[...document.querySelectorAll('#pinbox input')]; const i=+t.dataset.i;
+  if(e.key==='Backspace' && !t.value && boxes[i-1]){ boxes[i-1].focus(); boxes[i-1].value=''; document.getElementById('pinBtn').disabled=true; }
+  if(e.key==='Enter' && boxes.every(b=>b.value)) document.getElementById('pinBtn').click();
+});
+document.addEventListener('submit',e=>{
+  if(e.target.id==='panelForm'){ e.preventDefault(); toast(T('panelSoon')); }
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+window.addEventListener('hashchange',()=>{ closeModal(); if(route()==='attendance'){ /* keep tab */ } render(); });
+
+/* ================= LIVE DATA (স্বয়ংক্রিয় আপডেট) ================= */
+function applyLive(j){
+  let ok=false;
+  if(j && Array.isArray(j.notices) && j.notices.length){ NOTICES=j.notices.map((x,i)=>({id:x.id||i+1,d:x.d,t:x.t,img:x.img||0,url:x.url})); ok=true; }
+  if(j && Array.isArray(j.teachers) && j.teachers.length){ FACULTY=j.teachers; ok=true; }
+  if(j && Array.isArray(j.routine) && j.routine.length===GROUPS.length){ CLASSES=j.routine; ok=true; }
+  if(j && j.stats && j.stats.years && j.stats.years.length){ STATS=j.stats; ok=true; }
+  if(ok){ S.live=true; S.updatedAt=j.updatedAt||null; }
+  return ok;
+}
+async function loadLive(){
+  if(!LIVE_API) return;
+  const cached=store.get('amc_live',null); if(cached && applyLive(cached)) render();
+  try{
+    const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),9000);
+    const r=await fetch(LIVE_API,{signal:ctrl.signal,cache:'no-store'}); clearTimeout(to);
+    if(!r.ok) throw new Error('bad status');
+    const j=await r.json();
+    if(applyLive(j)){ store.set('amc_live',j); render(); }
+  }catch(e){ /* সংযোগ না থাকলে আগের (ক্যাশ/স্ন্যাপশট) তথ্যই দেখানো হবে */ }
+}
+
+render();
+loadLive();
+})();
+</script>
 </body>
-</html>
+  </html>
