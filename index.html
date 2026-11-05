@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1e3a8a">
-<title>Economica AMC</title>
+<title>Economics AMC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -49,7 +49,7 @@ header.top .wrap{display:flex;align-items:center;gap:12px;padding-top:10px;paddi
 .hero.lite{padding-bottom:64px}
 .hero.lite h1{font-size:34px}
 .datepill{display:inline-block;margin-top:16px;background:rgba(255,255,255,.16);padding:9px 18px;border-radius:30px;font-weight:600;font-size:14.5px}
-.cta{display:flex;align-items:center;gap:14px;background:var(--card);color:var(--text);border-radius:var(--radius);padding:16px;margin-top:22px;box-shadow:var(--shadow);width:100%;text-align:left}
+.cta{display:flex;align-items:center;gap:14px;background:var(--card);color:var(--text);border-radius:var(--radius);padding:16px;margin-top:22px;box-shadow:var(--shadow);width:100%;text-align:left;text-decoration:none}
 .cta .ib{width:52px;height:52px;border-radius:14px;background:var(--primary-l);color:var(--primary);display:grid;place-items:center;flex:none}
 .cta b{display:block;font-size:19px;color:var(--primary)}
 .cta span{font-size:13.5px;color:var(--muted)}
@@ -172,7 +172,6 @@ nav.bar-nav .ic{width:28px;height:28px}
 .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#0f1f55;color:#fff;padding:12px 20px;border-radius:14px;z-index:70;font-weight:600;max-width:90%;text-align:center}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 
-
 /* links, faculty */
 .lk{display:flex;align-items:center;gap:14px;padding:14px 4px;border-top:1px solid var(--line);text-decoration:none;color:var(--text)}
 .lk:first-of-type{border-top:0}
@@ -189,7 +188,6 @@ nav.bar-nav .ic{width:28px;height:28px}
 .hd{display:inline-block;background:var(--gold-l);color:var(--gold-t);font-size:12px;font-weight:700;padding:1px 10px;border-radius:12px;margin-left:6px;vertical-align:middle;font-family:'Noto Sans Bengali',sans-serif}
 .fl{margin-left:auto;font-weight:700;font-size:14px;text-decoration:none;white-space:nowrap}
 .livebar{background:var(--primary-l);color:var(--primary);border-radius:14px;padding:9px 14px;font-size:13.5px;margin-bottom:14px;font-weight:600}
-
 
 .tcard{display:flex;gap:16px;align-items:center;padding:16px 0;border-top:1px solid var(--line)}
 .tcard:first-of-type{border-top:0}
@@ -242,7 +240,7 @@ nav.bar-nav .ic{width:28px;height:28px}
       <circle cx="32" cy="29" r="3" fill="#b3261e"/>
       <path d="M20 44h24" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
     </svg>
-    <div class="brand"><b>Economica AMC</b><small id="appSub"></small></div>
+    <div class="brand"><b>Economics AMC</b><small id="appSub"></small></div>
     <button class="hbtn icon" id="themeBtn" data-act="theme" aria-label="Theme"></button>
     <button class="hbtn" id="langBtn" data-act="lang"></button>
   </div>
@@ -257,21 +255,14 @@ nav.bar-nav .ic{width:28px;height:28px}
 (function(){
 'use strict';
 
-/* ================= CONFIG & DEMO DATA =================
-   DEMO = true  -> নমুনা তথ্য ও ডেমো PIN চালু।
-   Phase 2-3: নোটিশ/রুটিন স্বয়ংক্রিয় সংগ্রহ থেকে আসবে।
-   Phase 4-6: PIN যাচাই ও হাজিরা Firebase + server function দিয়ে হবে। */
+/* ================= CONFIG & DEMO DATA ================= */
 const DEMO = true;
 const COLLEGE_NOTICE_URL = 'https://www.anandamohangovtcollege.edu.bd/home/notice';
 const COLLEGE_URL = 'https://www.anandamohangovtcollege.edu.bd/';
-// সংযুক্ত দুটি ওয়েবসাইট
 const LINKS = {
   college: 'https://www.anandamohangovtcollege.edu.bd/home/department?department=MTU=',
   attendance: 'https://amc-economics.vercel.app/'
 };
-/* স্বয়ংক্রিয় আপডেট: সাইটটি Vercel-এ ডিপ্লয় করলে /api/college নিজে থেকে কাজ করে।
-   GitHub Pages-এ রাখলে API_BASE-এ Vercel সাইটের ঠিকানা দিন, যেমন 'https://amc-xxxx.vercel.app'।
-   সংযোগ না পেলে নিচের সংরক্ষিত (কলেজের সাইট থেকে নেওয়া) তথ্যই দেখানো হয়। */
 const API_BASE = '';
 const LIVE_API = API_BASE + '/api/college';
 
@@ -282,8 +273,6 @@ const GROUPS = [
   { key:'y4', session:'2022-23', courses:[['Advanced Econometrics','Md. Ahsan Habib'],['Monetary Economics','Qudrat Hayat'],['Labour Economics','Md. Nazmul Hoda'],['Research Methodology','Md. Arif Billah']], room:'302', per:3 },
   { key:'ms', session:'2021-22', courses:[['Advanced Microeconomics','Mustafizur Rahman'],['Advanced Macroeconomics','Mohammad Nurul Amin'],['Economic Growth','Md. Ahsan Habib'],['Thesis Seminar','Md. Momen Hossain']], room:'401', per:2 }
 ];
-// কলেজের অর্থনীতি বিভাগ পেজের "Sunday's Routine" (২০২৬-১১-০১)। দিন: ০=রবি … ৪=বৃহস্পতি
-// lv: m=মাস্টার্স, p=প্রিলিমিনারি। শিক্ষকের নাম '' হলে কলেজের পেজে N/A ছিল।
 const R = (s,e,course,teacher,lv)=>({s,e,course,teacher,lv});
 const SUNDAY = [
  [R('09:00','09:45','Basic Macroeconomics','Sanjida Begum'), R('09:45','10:30','Basic Statistics','Md. Moshiul Alam')],
@@ -315,7 +304,7 @@ let NOTICES = [
   {id:680,d:'2026-10-01',img:1,t:'অর্থনীতি বিতর্ক ক্লাব কর্তৃক আয়োজিত শিক্ষক-শিক্ষার্থীদের শাস্ত্রীয় সমাগমে অংশগ্রহণ সংক্রান্ত বিজ্ঞপ্তি'},
   {id:664,d:'2026-09-15',img:0,t:'অনার্স ৩য় বর্ষ পরীক্ষা-২০২৫ এর অর্থনীতি বিষয়ের ফরম পূরণ সংক্রান্ত বিজ্ঞপ্তি'},
   {id:583,d:'2025-05-25',img:0,t:'ক্লাসে উপস্থিতি ও ইনকোর্স পরীক্ষা সংক্রান্ত জাতীয় বিশ্ববিদ্যালয়ের জরুরী নির্দেশনা'}
-].map(x=>Object.assign({url:NB+x.id},x)); // কলেজের অর্থনীতি বিভাগ পেজ থেকে (১ নভেম্বর ২০২৬)। ছবির সংখ্যা শুধু যেগুলো জানা ছিল সেগুলোর।
+].map(x=>Object.assign({url:NB+x.id},x));
 
 let FACULTY = [
   {n:'Md. Momen Hossain',d:'Professor',head:true,bcs:18,phone:'01712514459',id:182},
@@ -331,10 +320,9 @@ let FACULTY = [
   {n:'Saiful Islam',d:'Lecturer',bcs:36,phone:'01728542044',id:246},
   {n:'Mohammad Nurul Amin',d:'Lecturer',bcs:37,phone:'01734508732',id:274}
 ].map(x=>Object.assign({url:'https://www.anandamohangovtcollege.edu.bd/home/teacher/profile/'+x.id+'?departmentMTU='},x));
-// তথ্যসূত্র: কলেজের অফিসিয়াল ওয়েবসাইটে প্রকাশিত শিক্ষক প্রোফাইল। ছবি লাইভ API থেকে আসবে (photo ফিল্ড)।
-let STATS = {total:1264,male:616,female:648,books:5994,years:[
+const STATS = {total:1264,male:616,female:648,books:5994,years:[
   {t:249,m:115,f:134},{t:192,m:85,f:107},{t:182,m:87,f:95},{t:178,m:90,f:88},{t:67,m:37,f:30},{t:396,m:202,f:194}
-]}; // কলেজের অর্থনীতি বিভাগ পেজ থেকে (বইয়ের সংখ্যা আপনার স্ক্রিনশট থেকে)
+]};
 const DESIG_BN = {'Professor':'অধ্যাপক','Associate Professor':'সহযোগী অধ্যাপক','Assistant Professor':'সহকারী অধ্যাপক','Lecturer':'প্রভাষক'};
 
 /* ================= I18N ================= */
@@ -498,7 +486,7 @@ function hero(title, sub, lite){
   return `<section class="hero ${lite?'lite':''}"><div class="wrap"><div class="eyebrow">${T('dept')}</div><h1>${title}</h1><p>${sub}</p></div></section>`;
 }
 function footer(){
-  return `<footer class="foot"><div class="wrap"><b class="t">Economica AMC</b><p>${T('footA')}</p><p class="s">${T('footB')}</p><a href="${LINKS.college}" target="_blank" rel="noopener">${T('lkCollege')}${EXT}</a><br><a href="${LINKS.attendance}" target="_blank" rel="noopener">${T('lkAtt')}${EXT}</a></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><b class="t">Economics AMC</b><p>${T('footA')}</p><p class="s">${T('footB')}</p><a href="${LINKS.college}" target="_blank" rel="noopener">${T('lkCollege')}${EXT}</a><br><a href="${LINKS.attendance}" target="_blank" rel="noopener">${T('lkAtt')}${EXT}</a></div></footer>`;
 }
 function classRow(c, isToday){
   let cls='';
@@ -516,7 +504,6 @@ function noticeItem(x){
   const d=parse(x.d);
   return `<button class="nitem" data-act="notice" data-id="${x.id}"><div class="dbox"><b>${n(d.getDate())}</b><span>${L[S.lang].mshort[d.getMonth()]}</span></div><div><h3>${esc(x.t)}</h3><div class="meta">${x.img?`<span class="tag">${T('imgs',n(x.img))}</span>`:''}<span class="muted">${n(d.getFullYear())}</span></div></div></button>`;
 }
-
 
 function initials(nm){ const w=nm.split(/\s+/).filter(x=>!/^(Professor|Md|Md\.|Mohammad|Muhammad)$/i.test(x)); return ((w[0]||'')[0]||'')+((w[1]||'')[0]||''); }
 function desig(d){ return (S.lang==='bn'&&DESIG_BN[d])||d; }
@@ -572,11 +559,10 @@ function homeView(){
   const counts = GROUPS.map((g,i)=>classesFor(i,day).length);
   const total = counts.reduce((a,b)=>a+b,0);
   const tabs = GROUPS.map((g,i)=>`<button class="chip ${i===S.hYear?'on':''}" data-act="hyear" data-i="${i}">${T('yr')[i]} <span class="cnt">${n(counts[i])}</span></button>`).join('');
-  const list = classesFor(S.hYear,day);
   const rows = dayBlock(S.hYear,day,true);
-  return `${`<section class="hero"><div class="wrap"><div class="eyebrow">${T('est')}</div><h1>${T('dept')}</h1><p>${T('lead')}</p><span class="datepill">${fdate(now)}</span>
-    <button class="cta" data-act="goatt">${''}<div class="ib">${ICON.check}</div><div><b>${T('giveAtt')}</b><span>${T('giveAttSub')}</span></div><div class="go">${ICON.arrow}</div></button>
-    <a class="linkc" href="#/attendance" data-act="gomine">${T('seeMine')} →</a></div></section>`}
+  return `<section class="hero"><div class="wrap"><div class="eyebrow">${T('est')}</div><h1>${T('dept')}</h1><p>${T('lead')}</p><span class="datepill">${fdate(now)}</span>
+    <a class="cta" href="${LINKS.attendance}" target="_blank" rel="noopener noreferrer"><div class="ib">${ICON.check}</div><div><b>${T('giveAtt')}</b><span>${T('giveAttSub')}</span></div><div class="go">${ICON.arrow}</div></a>
+    <a class="linkc" href="${LINKS.attendance}" target="_blank" rel="noopener noreferrer">${T('seeMine')} →</a></div></section>
   <div class="wrap stack" style="margin-top:-34px;position:relative">
     <div class="card"><div class="row-h"><h2>${T('today')}</h2>${knownDay(day)?`<span class="pill">${T('totalCls',n(total))}</span>`:''}</div><div class="chips">${tabs}</div>${rows}${!S.live?`<div class="demo" style="margin-top:12px">${T('demoNote')}</div>`:''}</div>
     <div class="card"><div class="row-h"><h2>${T('latest')}</h2><a class="more" href="#/notices">${T('all')}</a></div>${NOTICES.slice(0,3).map(noticeItem).join('')}</div>
@@ -589,7 +575,6 @@ function routineView(){
   if(S.rDay===null) S.rDay = today<=4?today:0;
   const tabs = GROUPS.map((g,i)=>`<button class="chip ${i===S.rYear?'on':''}" data-act="ryear" data-i="${i}">${T('yr')[i]}</button>`).join('');
   const days = T('days').map((d,i)=>`<button class="chip day ${i===S.rDay?'on':''}" data-act="rday" data-i="${i}">${d}</button>`).join('');
-  const list = classesFor(S.rYear,S.rDay);
   const rows = dayBlock(S.rYear,S.rDay,S.rDay===today);
   return `${hero(T('routineT'),T('routineS'),true)}<div class="wrap stack pull"><div class="card">
     <div class="print-title">${T('printTitle')} — ${T('yr')[S.rYear]}</div>
@@ -685,7 +670,15 @@ function render(){
   document.getElementById('themeBtn').innerHTML = S.theme==='dark'?ICON.sun:ICON.moon;
   document.getElementById('themeBtn').setAttribute('aria-label',T('dark'));
   const active = r==='panel'?'attendance':(r==='faculty'||r==='about')?'home':r;
-  document.getElementById('nav').innerHTML = `<div class="wrap">${[['home','home'],['routine','cal'],['notices','bell'],['attendance','check']].map(([k,ic])=>`<a href="#/${k}" class="${active===k?'on':''}">${ICON[ic]}<span>${T(k)}</span></a>`).join('')}</div>`;
+
+  // নিচের হাজিরা বাটন সরাসরি আসল হাজিরা ওয়েবসাইটে যাবে
+  document.getElementById('nav').innerHTML = `<div class="wrap">
+    <a href="#/home" class="${active==='home'?'on':''}">${ICON.home}<span>${T('home')}</span></a>
+    <a href="#/routine" class="${active==='routine'?'on':''}">${ICON.cal}<span>${T('routine')}</span></a>
+    <a href="#/notices" class="${active==='notices'?'on':''}">${ICON.bell}<span>${T('notices')}</span></a>
+    <a href="${LINKS.attendance}" target="_blank" rel="noopener noreferrer">${ICON.check}<span>${T('attendance')}</span></a>
+  </div>`;
+
   if(r==='attendance' && S.attTab==='give' && S.step===1){ const f=document.querySelector('#pinbox input'); if(f && !('ontouchstart' in window)) f.focus(); }
 }
 
@@ -717,8 +710,6 @@ document.addEventListener('click',e=>{
         ${!S.live?`<div class="demo" style="margin-top:14px">${T('demoNote')}</div>`:''}
         <div class="actions"><a class="btn sm" href="${esc(x.url||COLLEGE_NOTICE_URL)}" target="_blank" rel="noopener">${T('viewOfficial')}${EXT}</a><button class="btn sm ghost" style="margin-top:0" data-close="1">${T('close')}</button></div>`);
       break; }
-    case 'goatt': S.attTab='give'; S.step=1; S.err=''; location.hash='#/attendance'; if(route()==='attendance') render(); break;
-    case 'gomine': S.attTab='mine'; S.err=''; break; // href শেষে hashchange রেন্ডার করবে
     case 'atab': S.attTab=el.dataset.v; S.err=''; render(); break;
     case 'pinnext': {
       const pin=[...document.querySelectorAll('#pinbox input')].map(i=>i.value).join('');
@@ -777,7 +768,7 @@ document.addEventListener('submit',e=>{
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 window.addEventListener('hashchange',()=>{ closeModal(); if(route()==='attendance'){ /* keep tab */ } render(); });
 
-/* ================= LIVE DATA (স্বয়ংক্রিয় আপডেট) ================= */
+/* ================= LIVE DATA ================= */
 function mergeTeachers(live){
   const byId={}; FACULTY.forEach(x=>{ if(x.id) byId[x.id]=x; });
   live.forEach(l=>{ const b=l&&l.id&&byId[l.id];
@@ -791,7 +782,7 @@ function applyLive(j){
   if(Array.isArray(j.teachers)&&j.teachers.length){ mergeTeachers(j.teachers); ok=true; }
   if(Array.isArray(j.routine)&&j.routine.length===GROUPS.length&&typeof j.routineDay==='number'&&j.routine.some(g=>g&&g.length)){
     ROUTINE_BY_DAY[j.routineDay]=j.routine; rebuildClasses(); store.set('amc_rbd',ROUTINE_BY_DAY); ok=true; }
-  if(j.stats&&j.stats.years&&j.stats.years.length){ STATS=j.stats; ok=true; }
+  if(j.stats&&j.stats.years&&j.stats.years.length){ Object.assign(STATS,j.stats); ok=true; }
   if(ok){ S.live=true; S.updatedAt=j.updatedAt||null; }
   return ok;
 }
@@ -811,4 +802,4 @@ loadLive();
 })();
 </script>
 </body>
-  </html>
+</html>
